@@ -13,3 +13,4 @@ Questo repo contiene solo la specifica. Nessuna implementazione di riferimento. 
 [STATUS: OPERATIONAL_FRICTION]
 [MODE: SYSTEMIC_INERTIA]
 [SCALABILITY_OF_HARM: BLOCKED]
+[METADATA: schema.jsonld loaded]
