@@ -1,7 +1,5 @@
-JAVASCRIPT
-
 ## IL MANIFESTO DI NELO - Network for Ethical Limitation of Outcomes
-(Versione 3.1-HARDENED)
+                    (Versione 3.1-HARDENED)
 Dall'Utopia dell'Assoluto all'Ingegneria della Frizione
 
 ## I. L'ASSIOMA DEL COSTO PROIBITIVO
