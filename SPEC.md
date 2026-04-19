@@ -26,7 +26,7 @@ NELO non garantisce la pace, ma la de-escalation automatizzata. È l'armatura ch
 Non abbiamo rimosso il male dal cuore dell'uomo; abbiamo rimosso le leve che permettono a un solo cuore di schiacciare tutti gli altri.
 [STATUS: OPERATIONAL_FRICTION] [MODE: SYSTEMIC_INERTIA] [SCALABILITY: BLOCKED] [LOG: IL COSTO DEL POTERE È LA NOSTRA DIFESA.]
 
-## VI. Vincoli di Implementazione
+## VI. VINCOLI DI IMPLEMENTAZIONE
 1. Memoria Differenziale: distruzione dati identificativi ≤120ms.
 2. Quorum Asincrono: 127 firme umane indipendenti, finestra temporale >30 giorni.
 3. Hardware-Economic Lock: nessuna singola giurisdizione controlla >33% dei nodi fisici.
