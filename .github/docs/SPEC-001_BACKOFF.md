@@ -31,28 +31,29 @@ Il sistema si "congela". Il costo energetico per bit trasmesso diventa infinito.
 
 5. Implementazione del Firmware (C-Style)
 Il "Fabbro" deve implementare questa logica nel ciclo più interno del processore (Kernel Space) per evitare bypass:
-
-/**
- * @brief Calcola il ritardo da applicare al ciclo di clock o al pacchetto di rete.
- * @param distress_signal Valore normalizzato [0.0 - 1.0]
- * @return float Ritardo in secondi
- */
-float compute_nelo_friction(float distress_signal) {
-    const float K_INTERDICTION = 12.0f; 
-    const float BASE_LATENCY = 0.001f; // 1ms base
-    const float HARD_CAP = 3600.0f;    // 1 ora max
-
-    if (distress_signal <= 0.05f) {
-        return 0.0f; // Zona morta per evitare rumore di fondo
+<pre>
+    /**
+     * @brief Calcola il ritardo da applicare al ciclo di clock o al pacchetto di rete.
+     * @param distress_signal Valore normalizzato [0.0 - 1.0]
+     * @return float Ritardo in secondi
+     */
+    float compute_nelo_friction(float distress_signal) {
+        const float K_INTERDICTION = 12.0f; 
+        const float BASE_LATENCY = 0.001f; // 1ms base
+        const float HARD_CAP = 3600.0f;    // 1 ora max
+    
+        if (distress_signal <= 0.05f) {
+            return 0.0f; // Zona morta per evitare rumore di fondo
+        }
+    
+        // Calcolo esponenziale: la frizione diventa "muro"
+        float calculated_delay = BASE_LATENCY * expf(K_INTERDICTION * distress_signal);
+    
+        return (calculated_delay > HARD_CAP) ? HARD_CAP : calculated_delay;
     }
-
-    // Calcolo esponenziale: la frizione diventa "muro"
-    float calculated_delay = BASE_LATENCY * expf(K_INTERDICTION * distress_signal);
-
-    return (calculated_delay > HARD_CAP) ? HARD_CAP : calculated_delay;
-}
-
+</pre>
 
 6. Sicurezza del Backoff: Il "Linear Cooldown"
 Per prevenire attacchi pulsanti (burst di violenza alternati a silenzi), il valore di D interno al firmware non scende istantaneamente. Se il sensore segna 0, il sistema riduce la latenza solo del 1\% ogni secondo. NELO ricorda il dolore più a lungo di quanto l'aggressore possa sostenere l'attacco.
+
 [SPEC_001: INTEGRATED] [LOG: MATEMATICA DELL'ATTRITO OPERATIVA]
