@@ -24,10 +24,19 @@ Inerzia Programmata: NELO è progettato per resistere al cambiamento più di qua
 ## V. IL RISULTATO: IL RESPIRO SISTEMICO
 NELO non garantisce la pace, ma la de-escalation automatizzata. È l'armatura che impedisce al conflitto di diventare catastrofe.
 Non abbiamo rimosso il male dal cuore dell'uomo; abbiamo rimosso le leve che permettono a un solo cuore di schiacciare tutti gli altri.
-[STATUS: OPERATIONAL_FRICTION] [MODE: SYSTEMIC_INERTIA] [SCALABILITY: BLOCKED] [LOG: IL COSTO DEL POTERE È LA NOSTRA DIFESA.]
 
 ## VI. VINCOLI DI IMPLEMENTAZIONE
 1. Memoria Differenziale: distruzione dati identificativi ≤120ms.
 2. Quorum Asincrono: 127 firme umane indipendenti, finestra temporale >30 giorni.
 3. Hardware-Economic Lock: nessuna singola giurisdizione controlla >33% dei nodi fisici.
 4. Abdicazione Funzionale: nessuna syscall privilegiata dopo il deployment.
+
+## DOCS:
+[SPEC-001](https://github.com/Architetto69/nelo-protocol/blob/main/.github/docs/SPEC-001_BACKOFF.md)
+
+[SPEC-002](https://github.com/Architetto69/nelo-protocol/blob/main/.github/docs/SPEC-002_QUORUM.md)
+
+[SPEC-003](https://github.com/Architetto69/nelo-protocol/blob/main/.github/docs/SPEC-003_OBLIO.md)
+
+
+[STATUS: OPERATIONAL_FRICTION] [MODE: SYSTEMIC_INERTIA] [SCALABILITY: BLOCKED] [LOG: IL COSTO DEL POTERE È LA NOSTRA DIFESA.]
