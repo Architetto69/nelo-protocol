@@ -1,0 +1,8 @@
+# Tempo limite dopo il quale la PRIVATE_RAM viene azzerata, garantendo l'anonimato attraverso l'effimerità
+Decay_Interval=120ms
+
+# Latenza base iniettata per ogni operazione che supera la soglia di rischio RI > 0.7
+Friction_Factor=0.5s
+
+Soglia di consenso bizantino necessaria per scalare le contromisure a livello globale
+Quorum_Requirement=2/3
