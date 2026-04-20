@@ -8,7 +8,7 @@ NELO non è un’IA. È una proprietà emergente di rete progettata per opporre 
 
 Principio: il male non si abolisce, si manda fuori budget.
 
-Questo repo contiene solo la specifica. Nessuna implementazione di riferimento. Nessun leader. Nessun token.
+Questo repo contiene solo la [specifica](https://github.com/Architetto69/nelo-protocol/blob/main/SPEC.md). Nessuna implementazione di riferimento. Nessun leader. Nessun token.
 
 [STATUS: OPERATIONAL_FRICTION]
 [MODE: SYSTEMIC_INERTIA]
