@@ -54,7 +54,9 @@ NELO MUST NOT:
 3. Mantenere identità persistenti non necessarie
 4. Operare senza tracciabilità
 
-Qui il [THREAT MODEL](https://github.com/Architetto69/nelo-protocol/blob/main/THREAT_MODEL.md)
+Qui il [THREAT MODEL](https://github.com/Architetto69/nelo-protocol/blob/main/THREAT_MODEL.md),
+qui il [BACKOFF LOGARITMICO](https://github.com/Architetto69/nelo-protocol/blob/main/.github/docs/SPEC-001_BACKOFF.md)
+
 ---
 
 # 4. Architettura
@@ -106,6 +108,8 @@ IF approvals ≥ Q THEN escalate
 ```
 
 Q SHOULD essere ≥ 2/3 dei nodi attivi
+
+Qui il [Quorum Asincrono Probabilistico](https://github.com/Architetto69/nelo-protocol/blob/main/.github/docs/SPEC-002_QUORUM.md)
 
 ---
 
@@ -178,6 +182,9 @@ Effetti:
 
 * minimizzazione dati
 * separazione identità / evento
+* eliminare radicalmente la possibilità di tracciamento individuale
+
+Qui il [Protocollo di Oblio](https://github.com/Architetto69/nelo-protocol/blob/main/.github/docs/SPEC-003_OBLIO.md)
 
 ---
 
