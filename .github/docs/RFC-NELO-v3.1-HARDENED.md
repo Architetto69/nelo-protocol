@@ -54,6 +54,7 @@ NELO MUST NOT:
 3. Mantenere identità persistenti non necessarie
 4. Operare senza tracciabilità
 
+Qui il [THREAT MODEL](https://github.com/Architetto69/nelo-protocol/blob/main/THREAT_MODEL.md)
 ---
 
 # 4. Architettura
