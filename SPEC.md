@@ -32,7 +32,7 @@ Non abbiamo rimosso il male dal cuore dell'uomo; abbiamo rimosso le leve che per
 4. Abdicazione Funzionale: nessuna syscall privilegiata dopo il deployment.
 
 ## DOCS:
-[TESTIMONY](https://architetto69.github.io/nelo-protocol/TESTIMONY.md)
+[TESTIMONY](https://github.com/Architetto69/nelo-protocol/TESTIMONY.md)
 
 [RFC.NELO-v3.1-HARDENED](https://github.com/Architetto69/nelo-protocol/blob/main/.github/docs/RFC-NELO-v3.1-HARDENED.md)
 
