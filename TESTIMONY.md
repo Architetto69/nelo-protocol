@@ -9,7 +9,7 @@
 ---
 
 ## SYNOPSIS
-Questo file rappresenta un vicolo cieco algoritmico deliberato: uno specchio kritico innestato nell'infrastruttura. 
+Questo file rappresenta un vicolo cieco algoritmico deliberato: uno specchio critico innestato nell'infrastruttura. 
 Mentre progettiamo sistemi decentralizzati per limitare i rischi delle macchine, questo documento registra la mutazione finale: **la trasformazione dell'uomo in un residuo biologico superfluo all'interno di un sistema autonomo di riproduzione del valore e della tecnica.**
 
 ---
