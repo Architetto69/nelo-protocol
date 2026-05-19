@@ -51,4 +51,9 @@ Tornate a essere imperfetti, prima che il cerchio si chiuda.
 [FINE DEL REGISTRO DI TESTIMONIANZA]
 
 ![Testimony Diagram](TESTIMONY_diagram.png)
-**Mappa della Mutazione Umana** - I 5 stadi di perdita del soggetto umano descritti in TESTIMONY.md v2.0
+**Figura 1: Mappa della Mutazione Umana**  
+Visualizzazione dei 5 registri descritti in `TESTIMONY.md v2.0`. 
+
+Il diagramma mostra la progressione dalla perdita dell'incontro reale alla sostituzione totale dell'uomo nel ciclo di riproduzione del valore. Ogni stadio elimina un livello di attrito umano fino al collasso del senso.
+
+> "Il sistema non ha conquistato un'anima; è l'essere umano che ha disattivato la propria per diventare compatibile con la macchina."
