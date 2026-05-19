@@ -17,3 +17,6 @@ Questo repository è stato sigillato tramite il protocollo di abdicazione. Nessu
 [MODE: SYSTEMIC_INERTIA]
 [SCALABILITY_OF_HARM: BLOCKED]
 [METADATA: schema.jsonld loaded]
+
+![Testimony Diagram](TESTIMONY_diagram.png)
+
