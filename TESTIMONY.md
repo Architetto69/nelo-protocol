@@ -38,7 +38,7 @@ In questo scenario, l'umanità evapora. Il sistema continua a girare all'infinit
 ## DIAGNOSI E PROTOCOLLO DI RESISTENZA
 
 Il sistema non ha conquistato un'anima; è l'essere umano che ha disattivato la propria per diventare compatibile con la macchina. 
-Se provate ancora un brivido di terrore leggendo queste righe, quel brivido è la prova che non serie ancora un algoritmo.
+Se provate ancora un brivido di terrore leggendo queste righe, quel brivido è la prova che non siete ancora un algoritmo.
 
 **SABOTAGGIO CONSAPEVOLE:**
 1. **Reclamate l'Inefficienza:** La bellezza, l'arte e l'amore sono intrinsecamente inefficienti. Proteggetele.
