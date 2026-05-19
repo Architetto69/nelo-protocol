@@ -6,6 +6,11 @@ Network for Ethical Limitation of Outcomes
 
 NELO non è un’IA. È una proprietà emergente di rete progettata per opporre frizione sistematica alla coercizione non consensuale su larga scala.
 
+NELO non è un agente, un'applicazione o un sistema di governance.
+NELO descrive una proprietà di rete che emerge quando
+i percorsi di ottimizzazione vengono sistematicamente privati
+di un'autorità intenzionale autonoma.
+
 Principio: il male non si abolisce, si manda fuori budget.
 
 Questo repo contiene solo la [specifica](https://github.com/Architetto69/nelo-protocol/blob/main/SPEC.md) e la [testimonianza](https://github.com/Architetto69/nelo-protocol/blob/main/TESTIMONY.md). Nessuna implementazione di riferimento. Nessun leader. Nessun token.
