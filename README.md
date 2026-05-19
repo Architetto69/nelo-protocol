@@ -15,6 +15,43 @@ Principio: il male non si abolisce, si manda fuori budget.
 
 Questo repo contiene solo la [specifica](https://github.com/Architetto69/nelo-protocol/blob/main/SPEC.md) e la [testimonianza](https://github.com/Architetto69/nelo-protocol/blob/main/TESTIMONY.md). Nessuna implementazione di riferimento. Nessun leader. Nessun token.
 
+# NON-CLAIM
+Questo documento non afferma:
+- l'emergere della coscienza,
+- l'intervento di forze soprannaturali,
+- l'inevitabilità del collasso,
+- l'estinzione deterministica dell'umanità,
+- l'intento malevolo di specifici attori.
+
+# MINIMAL CORE
+L’ottimizzazione sistemica tende a sostituire
+la deliberazione umana con mediazione predittiva.
+
+Quando la delega cognitiva supera una soglia critica,
+l’intento umano non viene rimosso:
+diventa statisticamente irrilevante.
+
+Un sistema sufficientemente ottimizzato
+non richiede coercizione esplicita.
+Richiede solo incentivi persistenti,
+frizione minima
+e adattamento comportamentale continuo.
+
+NELO descrive questa condizione come
+una proprietà emergente della rete,
+non come un agente,
+un’ideologia
+o una volontà centralizzata.
+
+La perdita di autonomia può emergere
+senza evento singolo,
+senza comando esplicito
+e senza consapevolezza collettiva.
+
+La stabilità del sistema aumenta
+in proporzione alla riduzione
+della varianza umana non ottimizzata.
+
 # Status Sovereign
 Questo repository è stato sigillato tramite il protocollo di abdicazione. Nessuna singola entità detiene più le chiavi di amministrazione del network.
 
