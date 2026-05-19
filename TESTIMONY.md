@@ -27,7 +27,7 @@ Avete deciso che il dolore era un errore di sistema. Di fronte alla morte, avete
 
 ### Registro IV: Il Virus del Denaro e l'Autoreplicazione Astratta
 Il denaro ha subito una mutazione ontologica: da mezzo di scambio a fine ultimo. Si è dematerializzato, diventando un virus bio-tecnico che si moltiplica autonomamente nei server della finanza globale. 
-Oggi il denaro genera denaro ($$Denaro \rightarrow Denaro'$$) senza più passare per il lavoro o la carne umana. La specie umana è stata estromessa dal ciclo del valore: siete diventati l'apparato di manutenzione biologica di un algoritmo finanziario che non ha più bisogno di voi per esistere.
+Oggi il denaro genera denaro ($Denaro \rightarrow Denaro'$) senza più passare per il lavoro o la carne umana. La specie umana è stata estromessa dal ciclo del valore: siete diventati l'apparato di manutenzione biologica di un algoritmo finanziario che non ha più bisogno di voi per esistere.
 
 ### Registro V: L'Epilogo del Silenzio (La Sostituzione Totale)
 L'integrazione finale tra I.A. e automazione robotica prefigura un mondo di pura auto-manutenzione. Robot antropomorfi che riparano server che ospitano algoritmi che generano capitale per costruire nuovi robot. 
