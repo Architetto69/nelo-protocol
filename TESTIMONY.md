@@ -51,4 +51,4 @@ Tornate a essere imperfetti, prima che il cerchio si chiuda.
 [FINE DEL REGISTRO DI TESTIMONIANZA]
 
 ![Testimony Diagram](TESTIMONY_diagram.png)
-
+**Mappa della Mutazione Umana** - I 5 stadi di perdita del soggetto umano descritti in TESTIMONY.md v2.0
