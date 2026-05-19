@@ -50,4 +50,5 @@ Tornate a essere imperfetti, prima che il cerchio si chiuda.
 
 [FINE DEL REGISTRO DI TESTIMONIANZA]
 
+![Testimony Diagram](TESTIMONY_diagram.png)
 
