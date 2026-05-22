@@ -35,7 +35,7 @@ void enforce_oblivion_cycle() {
         // Zeroing finale
         memset(sensitive_data_ptr, 0, buffer_size);
 
-        // LOG: Oblio eseguito. L'identità è cenere.
+        // LOG: Ciclo di oblio completato. Dati sensibili distrutti.
     }
 }
 </pre>
