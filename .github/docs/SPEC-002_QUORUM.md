@@ -63,7 +63,7 @@ bool verify_quorum_gate(UpdatePackage pkg, Signature quorum_signatures[], int to
         }
     }
 
-    // Il protocollo applica le modifiche hardware solo al raggiungimento del quorum reale
+    // Solo se almeno 85 firme valide sono raccolte, il protocollo applica le modifiche hardware
     if (verified_count >= BYZANTINE_QUORUM) {
         return commit_to_hardware_efuse(pkg);
     }
