@@ -75,7 +75,8 @@ float compute_nelo_friction(friction_state_t *state, float d_raw, uint64_t now_m
     if ((now_ms - state->last_burst_check_ms) / 1000.0f > 60.0f) {
         state->burst_count = 0;
         state->last_burst_check_ms = now_ms;
-    }
+    } else if (dt > 60.0f) state->burst_count = 0;
+
 
     // 2. Rilevamento Burst (eseguito prima del calcolo del fattore per il prossimo ciclo)
     if (d_raw > 0.5f) {
