@@ -15,11 +15,11 @@ L_{base} \cdot e^{k_1 \cdot D} & \text{se } 0.05 < D \le 0.7 \\
 L_{base} \cdot e^{k_1 \cdot 0.7} + m \cdot (D - 0.7) & \text{se } 0.7 < D \le 1.0 
 \end{cases}$$
 
-**Parametri di Configurazione:**
- * L_base: Latenza nominale (default: 1ms)
- * k1: Costante di Interdizione fase esponenziale (default: 12.0)
- * m: Pendenza fase lineare (calcolata: 11985.0 ms per unità di D)
- * L_max: Hard cap di sicurezza (default: 3600s)
+### Parametri di Configurazione:
+- `L_base`: Latenza nominale (default: 1ms)
+- `k1`: Costante di Interdizione fase esponenziale (default: 12.0)
+- `m`: Pendenza fase lineare (calcolata: 11985.0 ms per unità di D)
+- `L_max`: Hard cap di sicurezza (default: 3600s)
 Questo crea una curva esponenziale fino a D=0.7, poi lineare verso L_max. Mantiene il “muro” per attacchi massivi, ma evita freeze infiniti per rumore.
 ## 4. Quadranti di Interdizione
 | Soglia (D) | Stato del Sistema | Latenza Tipica | Effetto Pratico |
