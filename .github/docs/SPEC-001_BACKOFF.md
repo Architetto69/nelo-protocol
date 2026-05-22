@@ -57,7 +57,7 @@ float compute_nelo_friction(friction_state_t *state, float d_raw, uint64_t now_m
     const float K1 = 12.0f;
     const float L_BASE = 0.001f;
     const float L_MAX = 3600.0f;
-    const float M = 5.0f; // 5000ms per unità D in fase lineare
+    const float M = 11985.0f;
     const float TAU_BASE = 100.0f;
     const float ALPHA = 0.8f;
 
@@ -90,8 +90,5 @@ float compute_nelo_friction(friction_state_t *state, float d_raw, uint64_t now_m
 2. *Monotonicità*: L(D) è monotona non decrescente.
 3. *Liveness garantita*: L(D) ≤ L_max per ogni D. La rete non si blocca mai indefinitamente.
 4. *Impossibilità di reset*: Il cooldown è gestito solo in kernel space. Chiamate userland non possono resettare `d_internal`.
-
-## 6. Sicurezza del Backoff: Il "Linear Cooldown"
-Per prevenire attacchi pulsanti (burst di violenza alternati a silenzi), il valore di D interno al firmware non scende istantaneamente. Se il sensore segna 0, il sistema riduce la latenza solo del 1\% ogni secondo. NELO ricorda il dolore più a lungo di quanto l'aggressore possa sostenere l'attacco.
 
 [SPEC_001: v1.1-ADAPTIVE] [LOG: ATTRITO CONTROLLATO, LIVENESS PRESERVATA]
