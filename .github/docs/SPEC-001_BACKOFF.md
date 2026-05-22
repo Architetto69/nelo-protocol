@@ -9,6 +9,12 @@ Requisito: D deve essere firmato da ≥2f+1 nodi indipendenti su f avversari. In
 ## 3. Modello Matematico della Frizione
 La latenza applicata L è una funzione a tratti per evitare freeze totali da falsi positivi.
 ### Equazione di Stato:
+$$L(D) = \begin{cases} 
+0 & \text{se } D \le 0.05 \\
+L_{base} \cdot e^{k_1 \cdot D} & \text{se } 0.05 < D \le 0.7 \\
+L_{base} \cdot e^{k_1 \cdot 0.7} + m \cdot (D - 0.7) & \text{se } 0.7 < D \le 1.0 
+\end{cases}$$
+
 **Parametri di Configurazione:**
  * L_base: Latenza nominale (default: 1ms)
  * k1: Costante di Interdizione fase esponenziale (default: 12.0)
