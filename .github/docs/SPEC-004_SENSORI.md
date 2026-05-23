@@ -41,7 +41,10 @@ Il sensore calcola il segnale di stress e coercizione combinando tre canali biol
 Il calcolo dell'Indice D deve essere deterministico, matematicamente limitato e privo di euristiche aggiornabili o modelli statistici predittivi soggetti ad avvelenamento dei dati (*data poisoning*).
 ### 3.1 Funzione di Trasferimento Non Lineare
 I tre vettori biologici grezzi – Conduttanza Cutanea (G), Variabilità Cardiaca normalizzata (V_{hrv}), e Gradiente Termico (\Delta T) – vengono mappati in matrici di rischio locali normalizzate nell'intervallo [0, 1].
-L'Indice di Danno globale D è calcolato applicando una funzione di attivazione sigmoidale non lineare pesata, progettata per saturare rapidamente verso l'alto in presenza di anomalie simultanee su più canali:
+L'Indice di Danno globale D è calcolato applicando una funzione di attivazione sigmoidale non lineare pesata, progettata per saturare rapidamente verso l'alto in presenza di anomalie simultanee su più canali:  
+
+$$D = \frac{1}{1 + e^{-\left(\alpha \cdot G + \beta \cdot (1 - V_{hrv}) + \gamma \cdot \Delta T - \delta\right)}}$$
+  
 Dove \alpha, \beta, \gamma rappresentano i pesi hardware tarati in fase di fabbricazione del nodo, e \delta è il fattore di offset difensivo che impedisce ai falsi positivi microscopici (es. attività fisica moderata) di superare la soglia critica di innesco (0.7).
 ### 3.2 Meccanica dell'Oblio Biometrico (SPEC-003 Integration)
 I dati biometrici grezzi necessari per calcolare G, V_{hrv} e \Delta T sono considerati **informazioni ad altissimo rischio di de-anonimizzazione**. Il sensore applica l'oblio radicale secondo le seguenti regole:
