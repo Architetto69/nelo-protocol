@@ -75,111 +75,31 @@ L'involucro protettivo del cripto-sensore è rivestito internamente da una magli
  * **Procedura di Emergenza:** Il firmware interrompe qualsiasi operazione in corso, invoca il coprocessore crittografico per sovrascrivere immediatamente il settore contenente SK_{sensor} con zeri logici, ed esegue un ciclo continuo di scrittura e cancellazione su tutta la SRAM, lasciando il chip permanentemente inutilizzabile e privo di materiale crittografico (Zeroizzazione Hardware).
 A questo punto la struttura formale della SPEC-004 è definita in ogni suo vincolo logico e di sicurezza.
 ## Appendice Tecnica SPEC-004: Blindatura Hardware su Nordic nRF52840
+[file nelo_crypto_sensor_hardened.c](../src/file nelo_crypto_sensor_hardened.c)
+- Implementazione dei vincoli di sicurezza hardware SPEC-004 su nRF52840.
+- Target: Nordic Semiconductor nRF52840 (Cortex-M4 + CryptoCell-310)
+- version 3.1-HARDENED
+
 
 ## Mappatura Finale dell'Integrazione Hardware (I^2C)
-+-------------------------------------------------------------------------+
-| SCHERMATURA DI FARADAY (Gabbia Metallica Saldata su PCB)                |
-|                                                                         |
-|  [MAX30009] ────► (GSR / Impedenza AC) ────┐                            |
-|  [MAX30102] ────► (PPG Rosso / IR)     ────┼──► Bus I2C Privato         |
-|  [TMP117-S] ────► (Temp. Cute)         ────┤    (Linee Schermate)       |
-|  [TMP117-E] ────► (Temp. Ambiente)     ────┘            │               |
-|                                                         ▼               |
-|  +-------------------------------------------------------------------+  |
-|  | HARDWARE NRF52840                                                 |  |
-|  |  [ TWIM0 EasyDMA ] ──► [ Matrice Effimera RAM ]                   |  |
-|  |                                │ (Wipe Attivo 120ms da TIMER1)    |  |
-|  |                                ▼                                  |  |
-|  |              [ TRNG Noise Injection / Zeroizzazione ]             |  |
-|  +-------------------------------------------------------------------+  |
-+-------------------------------------------------------------------------+
-```c
-/**
- * @file nelo_crypto_sensor_hardened.c
- * @brief Implementazione dei vincoli di sicurezza hardware SPEC-004 su nRF52840.
- * @note Target: Nordic Semiconductor nRF52840 (Cortex-M4 + CryptoCell-310)
- * @version 3.1-HARDENED
- */
-
-#include "nrf.h"
-#include "nrf_delay.h"
-#include <stdint.h>
-#include <stddef.h>
-
-// --- INDIRIZZI I2C PERIFERICHE (SPEC-004) ---
-#define MAX30102_ADDR             0x57  
-#define MAX30009_ADDR             0x51  
-#define TMP117_SKIN_ADDR          0x48  
-#define TMP117_ENV_ADDR           0x49  
-
-// Definizioni per l'interfaccia crittografica CryptoCell-310
-#define CRYS_BASE_ADDR            (0x5002A000UL)
-#define CRYS_REG_AO_SW_RESET      (*(volatile uint32_t *)(CRYS_BASE_ADDR + 0x004UL))
-#define CRYS_REG_HOST_CRYPTOCELL_EN (*(volatile uint32_t *)(CRYS_BASE_ADDR + 0x008UL))
-
-#define BIOMETRIC_BUFFER_SIZE     64
-#define TIMEOUT_MAX_LOOPS         10000
-
-// Buffer effimeri forzati in RAM (allineati a 32-bit per EasyDMA)
-static volatile uint8_t biometric_raw_buffer[BIOMETRIC_BUFFER_SIZE] _attribute_((aligned(4)));
-static uint8_t entropy_pool[BIOMETRIC_BUFFER_SIZE] _attribute_((aligned(4)));
-static volatile uint8_t entropy_pool_index = 0;
-
-// Buffer RAM obbligatorio per il comando EasyDMA (evita allocazione in Flash .rodata)
-static uint8_t i2c_wipe_cmd[2] _attribute_((aligned(4))) = {0x04, 0x40};
-
-/**
- * @brief INTERRUPT HANDLER TIMER1: Obliterazione totale (120ms) con protezione da stallo
- */
-void TIMER1_IRQHandler(void) {
-    if (NRF_TIMER1->EVENTS_COMPARE[0] == 1) {
-        NRF_TIMER1->EVENTS_COMPARE[0] = 0;
-
-        // 1. Congela EasyDMA del modulo I2C con timeout di sicurezza
-        NRF_TWIM0->TASKS_STOP = 1;
-        uint32_t timeout = TIMEOUT_MAX_LOOPS;
-        while ((NRF_TWIM0->EVENTS_STOPPED == 0) && (--timeout > 0));
-        NRF_TWIM0->EVENTS_STOPPED = 0;
-
-        // 2. Wipe distruttivo della RAM locale
-        uint8_t *raw_ptr = (uint8_t *)biometric_raw_buffer;
-        if (entropy_pool_index >= BIOMETRIC_BUFFER_SIZE) {
-            for (size_t i = 0; i < BIOMETRIC_BUFFER_SIZE; i++) {
-                raw_ptr[i] = entropy_pool[i];
-            }
-        } else {
-            for (size_t i = 0; i < BIOMETRIC_BUFFER_SIZE; i++) {
-                raw_ptr[i] = 0x55; // Pattern di sfoltimento alternato alternativo
-            }
-        }
-        entropy_pool_index = 0;
-
-        // 3. Reset FIFO esterno (Puntatore rigorosamente in RAM)
-        NRF_TWIM0->ADDRESS = MAX30102_ADDR;
-        NRF_TWIM0->TXD.PTR = (uint32_t)i2c_wipe_cmd; 
-        NRF_TWIM0->TXD.MAXCNT = 2;
-        NRF_TWIM0->TASKS_STARTTX = 1;
-        
-        timeout = TIMEOUT_MAX_LOOPS;
-        while ((NRF_TWIM0->EVENTS_TXSTARTED == 0) && (--timeout > 0));
-        NRF_TWIM0->EVENTS_TXSTARTED = 0;
-
-        // Barriere di memoria per stabilizzare la pipeline
-        __DSB();
-        __ISB();
-    }
-}
-
-/**
- * @brief 1. ATTIVAZIONE HARDENED DI APPROTECT (Blocco permanente del Debugger SWD)
- */
-void nelo_hw_enforce_approtect(void) {
-    if (NRF_UICR->APPROTECT != 0x00000000) {
-        NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Wen << NVMC_CONFIG_WEN_Pos;
-        while (NRF_NVMC->READY == NVMC_READY_READY_Busy);
-
-        NRF_UICR->APPROTECT = 0x00000000;
-        while (NRF_NVMC->READY == NVMC_READY_READY_Busy);
+<pre>
++-------------------------------------------------------------------------+  
+| SCHERMATURA DI FARADAY (Gabbia Metallica Saldata su PCB)                |  
+|                                                                         |  
+|  [MAX30009] ────► (GSR / Impedenza AC) ────┐                            |  
+|  [MAX30102] ────► (PPG Rosso / IR)     ────┼──► Bus I2C Privato         |  
+|  [TMP117-S] ────► (Temp. Cute)         ────┤    (Linee Schermate)       |  
+|  [TMP117-E] ────► (Temp. Ambiente)     ────┘            │               |  
+|                                                         ▼               |  
+|  +-------------------------------------------------------------------+  |  
+|  | HARDWARE NRF52840                                                 |  |  
+|  |  [ TWIM0 EasyDMA ] ──► [ Matrice Effimera RAM ]                   |  |  
+|  |                                │ (Wipe Attivo 120ms da TIMER1)    |  |  
+|  |                                ▼                                  |  |  
+|  |              [ TRNG Noise Injection / Zeroizzazione ]             |  |  
+|  +-------------------------------------------------------------------+  |  
++-------------------------------------------------------------------------+  
+</pre>
 
 
 ## Note di Audit di Sicurezza per lo Sviluppatore (SPEC-004-AUDIT):
