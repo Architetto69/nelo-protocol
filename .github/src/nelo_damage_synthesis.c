@@ -21,28 +21,27 @@
 
 /**
  * @brief Approssimazione simmetrica e stabile della sigmoide tramite funzione razionale.
- * @details Sostituisce la serie di Taylor con una sigmoide algebrica normalizzata in Q16.16.
- *          Garantisce l'assenza di asimmetrie e previene divergenze polinomiali.
+ * @details Versione blindata senza perdite di bit sull'LSB e calcolo simmetrico puro.
  * @param z Valore di input combinato in formato fixed-point Q16.16
  * @return Output Q16.16 limitato rigorosamente nell'intervallo [0, F_ONE]
  */
 static int32_t nelo_fixed_sigmoid_hardened(int32_t z) {
-    // Clamping preventivo per evitare overflow computazionali estremi
+    // Clamping preventivo basato sui margini di saturazione dell'enclave
     if (z <= -12 * F_ONE) return 0;
     if (z >=  12 * F_ONE) return F_ONE;
 
     int32_t abs_z = (z < 0) ? -z : z;
 
-    // Calcolo del denominatore: (1.0 + |z|) in Q16.16
-    // Dividiamo z per il denominatore per ottenere la retta di transizione normalizzata
-    int64_t num = ((int64_t)z) << 16;
+    // Calcolo ottimizzato per preservare la linearità dell'LSB.
+    // Trasliamo la retta di calcolo prima della divisione distruttiva.
+    int64_t num = ((int64_t)z) << 15; // Shift ridotto per integrare lo shift del riscalamento (>> 1)
     int32_t den = F_ONE + abs_z;
-    int32_t intermediate = (int32_t)(num / den); // Risultato in Q16.16 compreso tra -1.0 e +1.0
+    int32_t intermediate = (int32_t)(num / den);
 
-    // Traslazione e riscalamento: D = 0.5 * (1.0 + intermedio)
-    int32_t result = F_HALF + (intermediate >> 1);
+    // Risultato finale esente da asimmetrie di troncamento
+    int32_t result = F_HALF + intermediate;
 
-    // Clamping finale di sicurezza sul confine biologico
+    // Clamping finale sul confine biologico formale
     if (result < 0) return 0;
     if (result > F_ONE) return F_ONE;
 
@@ -65,7 +64,7 @@ uint16_t nelo_compute_damage_index(int32_t raw_g, int32_t raw_v_hrv, int32_t raw
     // 1. Calcolo dei singoli contributi pesati (Spostamento del prodotto a 64 bit)
     int64_t g_contrib = ((int64_t)raw_g * WEIGHT_ALPHA) >> 16;
     
-    // Inversione logica HRV: la reazione di stress aumenta al decrescere della variabilità
+    // Inversione logica HRV: lo stress aumenta al decrescere della variabilità
     int32_t v_inv = F_ONE - raw_v_hrv;
     int64_t v_contrib = ((int64_t)v_inv * WEIGHT_BETA) >> 16;
     
@@ -77,9 +76,9 @@ uint16_t nelo_compute_damage_index(int32_t raw_g, int32_t raw_v_hrv, int32_t raw
     // 3. Elaborazione tramite funzione di attivazione sigmoidea antiriflesso
     int32_t d_q16 = nelo_fixed_sigmoid_hardened(z);
     
-    // 4. Mappatura formale da Q16.16 a Uint16 fixed-point [0, 65535]
-    // Poiché 1.0 in Q16.16 corrisponde a 65536, per mappare su 65535 eseguiamo un adattamento lineare sicuro
-    uint32_t d_final = (uint32_t)((((int64_t)d_q16) * 65535) >> 16);
+    // 4. Mappatura formale lineare con arrotondamento convergente (Round-to-Nearest)
+    // Aggiungendo l'offset (1 << 15) prima dello shift, eliminiamo l'appiattimento numerico
+    uint32_t d_final = (uint32_t)(((((int64_t)d_q16) * 65535) + F_HALF) >> 16);
     
     if (d_final > 65535) {
         d_final = 65535;
