@@ -72,6 +72,7 @@ L'involucro protettivo del cripto-sensore è rivestito internamente da una magli
  * **Procedura di Emergenza:** Il firmware interrompe qualsiasi operazione in corso, invoca il coprocessore crittografico per sovrascrivere immediatamente il settore contenente SK_{sensor} con zeri logici, ed esegue un ciclo continuo di scrittura e cancellazione su tutta la SRAM, lasciando il chip permanentemente inutilizzabile e privo di materiale crittografico (Zeroizzazione Hardware).
 A questo punto la struttura formale della SPEC-004 è definita in ogni suo vincolo logico e di sicurezza.
 ## Appendice Tecnica SPEC-004: Blindatura Hardware su Nordic nRF52840
+```c
 /**
  * @file nelo_crypto_sensor_hardened.c
  * @brief Implementazione dei vincoli di sicurezza hardware SPEC-004 su nRF52840.
@@ -219,4 +220,4 @@ void nelo_sensor_security_lockdown(void) {
     nelo_hw_cryptocell_enable();
 }
 
-
+```
