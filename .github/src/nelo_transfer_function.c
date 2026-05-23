@@ -1,6 +1,6 @@
 /**
  * @file nelo_transfer_function.c
- * @brief Implementazione Firmware (Virgola Fissa / Hardened) della Funzione di Trasferimento SPEC-004 su nRF52840.
+ * @brief Gestione delle matrici di rischio locali e campionamento bus I2C privato schermato.
  * @note Target: Nordic Semiconductor nRF52840 (Cortex-M4 + CryptoCell-310)
  * @version 3.1-HARDENED
  */
