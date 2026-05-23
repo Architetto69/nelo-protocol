@@ -282,18 +282,15 @@ typedef struct {
 static baseline_t temp_base;
 
 /**
+/**
  * @brief Approssimazione polinomiale veloce della sigmoide: 1 / (1 + e^-x)
  * @param x Valore di input in formato fixed-point Q16.16
  * @return Output Q16.16 limitato rigorosamente nell'intervallo [0, F_ONE]
  */
 static int32_t nelo_fast_sigmoid(int32_t x) {
-    // Approssimazione di Taylor troncata per l'argomento logistico centrale
-    // Se x è fortemente negativo, la sigmoide tende a 0
     if (x < -5 * F_ONE) return 0;
-    // Se x è fortemente positivo, la sigmoide satura a 1.0
     if (x > 5 * F_ONE) return F_ONE;
     
-    // Approssimazione lineare a tratti per la protezione dei cicli di clock dell'ISR
     int32_t e_x;
     if (x >= 0) {
         e_x = F_ONE + x + ((x * x) >> 17); // 1 + x + x^2/2
@@ -304,6 +301,57 @@ static int32_t nelo_fast_sigmoid(int32_t x) {
         return (F_ONE * F_ONE) / (F_ONE + e_x);
     }
 }
+
+/**
+ * @brief Calcola la velocità di crollo termico isolandola dalla temperatura ambiente
+ * @param t_skin_raw Temperatura cutanea attuale (es: 3350 = 33.5°C)
+ * @return Punteggio di anomalia S_deltaT in formato Q16.16
+ */
+static int32_t process_thermal_anomaly(uint16_t t_skin_raw) {
+    if (!temp_base.primed) {
+        for (int i = 0; i < EXP_SAMPLES; i++) temp_base.history[i] = t_skin_raw;
+        temp_base.sum = t_skin_raw * EXP_SAMPLES;
+        temp_base.index = 0;
+        temp_base.primed = true;
+        return 0;
+    }
+
+    uint32_t current_baseline = temp_base.sum / EXP_SAMPLES;
+    int32_t drift = (int32_t)current_baseline - (int32_t)t_skin_raw;
+    
+    temp_base.sum -= temp_base.history[temp_base.index];
+    temp_base.history[temp_base.index] = t_skin_raw;
+    temp_base.sum += t_skin_raw;
+    temp_base.index = (temp_base.index + 1) % EXP_SAMPLES;
+
+    if (drift <= 0) return 0;
+
+    int32_t s_delta_t = (drift * F_ONE) / 150;
+    if (s_delta_t > F_ONE) s_delta_t = F_ONE;
+
+    return s_delta_t;
+}
+
+/**
+ * @brief FUNZIONE DI TRASFERIMENTO CRITTOGRAFICA - INDICE D
+ */
+uint32_t nelo_calculate_d_index(int32_t s_g, int32_t s_v, uint16_t t_skin) {
+    int32_t s_delta_t = process_thermal_anomaly(t_skin);
+
+    int64_t linear_sum = ((int64_t)WEIGHT_ALPHA * s_g) + 
+                         ((int64_t)WEIGHT_BETA * s_v) + 
+                         ((int64_t)WEIGHT_GAMMA * s_delta_t);
+    linear_sum >>= 16; 
+
+    int64_t cross_product = ((int64_t)s_g * s_v) >> 16;
+    cross_product = (cross_product * s_delta_t) >> 16;
+    
+    int64_t reinforcement_term = (cross_product * WEIGHT_OMEGA) >> 16;
+    int32_t z = (int32_t)(linear_sum + reinforcement_term) - BIAS_DELTA;
+
+    return (uint32_t)nelo_fast_sigmoid(z);
+}
+
 
 /**
  * @brief Calcola la velocità di crollo termico isolandola dalla temperatura ambiente
