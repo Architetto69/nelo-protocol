@@ -92,6 +92,8 @@ A questo punto la struttura formale della SPEC-004 è definita in ogni suo vinco
 
 // Buffer effimero per il calcolo dell'Indice D (120ms max prima del wipe)
 #define BIOMETRIC_BUFFER_SIZE     64
+// Ogni interazione con il buffer deve essere protetta da barriere di memoria o disattivazione
+// temporanea degli interrupt dell'ADC durante la lettura/scrittura del Motore di Sintesi
 static uint16_t biometric_raw_buffer[BIOMETRIC_BUFFER_SIZE] __attribute__((aligned(4)));
 static volatile uint8_t buffer_index = 0;
 
