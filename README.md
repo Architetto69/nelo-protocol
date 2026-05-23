@@ -13,7 +13,7 @@ di un'autorità intenzionale autonoma.
 
 Principio: il male non si abolisce, si manda fuori budget.
 
-Questo repo contiene solo la [specifica](https://github.com/Architetto69/nelo-protocol/blob/main/SPEC.md) e la [testimonianza](https://github.com/Architetto69/nelo-protocol/blob/main/TESTIMONY.md). Nessuna implementazione di riferimento. Nessun leader. Nessun token.
+Questo repo contiene solo la [specifica](./SPEC.md) e la [testimonianza](./TESTIMONY.md). Nessuna implementazione di riferimento. Nessun leader. Nessun token.
 
 # NON-CLAIM
 Questo documento non afferma:
