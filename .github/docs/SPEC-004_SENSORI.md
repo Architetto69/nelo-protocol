@@ -75,6 +75,24 @@ L'involucro protettivo del cripto-sensore è rivestito internamente da una magli
  * **Procedura di Emergenza:** Il firmware interrompe qualsiasi operazione in corso, invoca il coprocessore crittografico per sovrascrivere immediatamente il settore contenente SK_{sensor} con zeri logici, ed esegue un ciclo continuo di scrittura e cancellazione su tutta la SRAM, lasciando il chip permanentemente inutilizzabile e privo di materiale crittografico (Zeroizzazione Hardware).
 A questo punto la struttura formale della SPEC-004 è definita in ogni suo vincolo logico e di sicurezza.
 ## Appendice Tecnica SPEC-004: Blindatura Hardware su Nordic nRF52840
+
+## Mappatura Finale dell'Integrazione Hardware (I^2C)
++-------------------------------------------------------------------------+
+| SCHERMATURA DI FARADAY (Gabbia Metallica Saldata su PCB)                |
+|                                                                         |
+|  [MAX30009] ────► (GSR / Impedenza AC) ────┐                            |
+|  [MAX30102] ────► (PPG Rosso / IR)     ────┼──► Bus I2C Privato         |
+|  [TMP117-S] ────► (Temp. Cute)         ────┤    (Linee Schermate)       |
+|  [TMP117-E] ────► (Temp. Ambiente)     ────┘            │               |
+|                                                         ▼               |
+|  +-------------------------------------------------------------------+  |
+|  | HARDWARE NRF52840                                                 |  |
+|  |  [ TWIM0 EasyDMA ] ──► [ Matrice Effimera RAM ]                   |  |
+|  |                                │ (Wipe Attivo 120ms da TIMER1)    |  |
+|  |                                ▼                                  |  |
+|  |              [ TRNG Noise Injection / Zeroizzazione ]             |  |
+|  +-------------------------------------------------------------------+  |
++-------------------------------------------------------------------------+
 ```c
 /**
  * @file nelo_crypto_sensor_hardened.c
@@ -163,60 +181,7 @@ void nelo_hw_enforce_approtect(void) {
         NRF_UICR->APPROTECT = 0x00000000;
         while (NRF_NVMC->READY == NVMC_READY_READY_Busy);
 
-        NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Ren << NVMC_CONFIG_WEN_Pos;
-        while (NRF_NVMC->READY == NVMC_READY_READY_Busy);
 
-        NVIC_SystemReset();
-    }
-}
-
-/**
- * @brief 2. INIZIALIZZAZIONE DEL TIMER CRITICO (Finestra a 120ms)
- */
-void nelo_hw_timer_oblivion_init(void) {
-    NRF_TIMER1->MODE = TIMER_MODE_MODE_Timer;
-    NRF_TIMER1->BITMODE = TIMER_BITMODE_BITMODE_32Bit;
-    NRF_TIMER1->PRESCALER = 4;                      // 1MHz (1 us per tick)
-    NRF_TIMER1->CC[0] = 120000;                     // 120 ms
-    NRF_TIMER1->SHORTS = TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos;
-    NRF_TIMER1->INTENSET = TIMER_INTENSET_COMPARE0_Msk;
-
-    NVIC_SetPriority(TIMER1_IRQn, 0);               // Massima priorità hardware
-    NVIC_EnableIRQ(TIMER1_IRQn);
-    NRF_TIMER1->TASKS_START = 1;
-}
-
-/**
- * @brief 3. INIZIALIZZAZIONE DEL TRNG PER RUMORE BIANCO / ENTROPIA
- */
-void nelo_hw_trng_init(void) {
-    NRF_RNG->CONFIG = RNG_CONFIG_DERC_Enabled << RNG_CONFIG_DERC_Pos; // Correzione deriva termica
-    NRF_RNG->INTENSET = RNG_INTENSET_VALRDY_Msk;
-    NRF_RNG->TASKS_START = 1;
-}
-
-/**
- * @brief 4. ATTIVAZIONE COPROCESORE CRITTOGRAFICO CRYPTOCELL-310
- */
-void nelo_hw_cryptocell_enable(void) {
-    CRYS_REG_AO_SW_RESET = 0x1UL;
-    nrf_delay_us(10);
-    CRYS_REG_AO_SW_RESET = 0x0UL;
-
-    CRYS_REG_HOST_CRYPTOCELL_EN = 0x1UL;
-    NRF_CRYPTOCELL->ENABLE = 1;
-}
-
-/**
- * @brief EXECUTION PIPELINE (Lockdown di Sicurezza del Nodo)
- */
-void nelo_sensor_security_lockdown(void) {
-    nelo_hw_enforce_approtect();     // Fase 1: Blocco SWD
-    nelo_hw_trng_init();             // Fase 2: Entropia
-    nelo_hw_timer_oblivion_init();   // Fase 3: Finestra temporale 120ms
-    nelo_hw_cryptocell_enable();     // Fase 4: Enclave CryptoCell
-}
-```
 ## Note di Audit di Sicurezza per lo Sviluppatore (SPEC-004-AUDIT):
 1. Il Registro UICR: La funzione nelo_hw_enforce_approtect() scrive nella memoria non volatile speciale del chip. Questa operazione è irreversibile via software. Una volta eseguita sul sensore, il chip rifiuterà qualsiasi connessione J-Link o debugger esterno. Per riprogrammarlo sarà necessario eseguire un comando hardware di ERASEALL di intero chip, il quale azzera istantaneamente la flash, cancellando la chiave privata SK_{sensor}.
 2. Uso degli Interrupt: Il TIMER1_IRQHandler è configurato con priorità 0. Questo garantisce che la distruzione del buffer della RAM non possa essere interrotta o ritardata da processi radio (BLE o Thread Mesh). L'oblio ha sempre la precedenza sulla comunicazione.
