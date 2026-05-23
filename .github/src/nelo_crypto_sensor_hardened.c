@@ -45,6 +45,9 @@ void TIMER1_IRQHandler(void) {
         while ((NRF_TWIM0->EVENTS_STOPPED == 0) && (--timeout > 0));
         NRF_TWIM0->EVENTS_STOPPED = 0;
 
+        // Disattivazione forzata del modulo per sganciare i puntatori AHB di EasyDMA
+        NRF_TWIM0->ENABLE = (TWIM_ENABLE_ENABLE_Disabled << TWIM_ENABLE_ENABLE_Pos);
+
         // 2. Wipe distruttivo della RAM locale
         uint8_t *raw_ptr = (uint8_t *)biometric_raw_buffer;
         if (entropy_pool_index >= BIOMETRIC_BUFFER_SIZE) {
@@ -53,10 +56,13 @@ void TIMER1_IRQHandler(void) {
             }
         } else {
             for (size_t i = 0; i < BIOMETRIC_BUFFER_SIZE; i++) {
-                raw_ptr[i] = 0x55; // Pattern di sfoltimento alternato alternativo
+                raw_ptr[i] = 0x55; // Pattern di sfoltimento alternato
             }
         }
         entropy_pool_index = 0;
+
+        // Ripristina il modulo I2C per l'invio del comando di pulizia esterna
+        NRF_TWIM0->ENABLE = (TWIM_ENABLE_ENABLE_Enabled << TWIM_ENABLE_ENABLE_Pos);
 
         // 3. Reset FIFO esterno (Puntatore rigorosamente in RAM)
         NRF_TWIM0->ADDRESS = MAX30102_ADDR;
@@ -64,20 +70,29 @@ void TIMER1_IRQHandler(void) {
         NRF_TWIM0->TXD.MAXCNT = 2;
         NRF_TWIM0->TASKS_STARTTX = 1;
         
+        // Sincronizzazione protetta: attendi che l'intero byte sia trasmesso fisicamente sul bus
         timeout = TIMEOUT_MAX_LOOPS;
-        while ((NRF_TWIM0->EVENTS_TXSTARTED == 0) && (--timeout > 0));
-        NRF_TWIM0->EVENTS_TXSTARTED = 0;
+        while ((NRF_TWIM0->EVENTS_LASTTX == 0) && (--timeout > 0));
+        NRF_TWIM0->EVENTS_LASTTX = 0;
 
-        // Barriere di memoria per stabilizzare la pipeline
+        // Genera STOP sul bus per chiudere la sessione fisica ed evitare di lasciare linee flottanti
+        NRF_TWIM0->TASKS_STOP = 1;
+        timeout = TIMEOUT_MAX_LOOPS;
+        while ((NRF_TWIM0->EVENTS_STOPPED == 0) && (--timeout > 0));
+        NRF_TWIM0->EVENTS_STOPPED = 0;
+
+        // Barriere di memoria per stabilizzare la pipeline d'esecuzione
         __DSB();
         __ISB();
     }
 }
 
 /**
- * @brief 1. ATTIVAZIONE HARDENED DI APPROTECT (Blocco permanente del Debugger SWD)
+ * @brief 1. ATTIVAZIONE HARDENED DI APPROTECT (Blocco hardware del Debugger SWD)
+ * @note Implementa la logica a doppio livello richiesta dalle Rev 3 del silicio nRF52840.
  */
 void nelo_hw_enforce_approtect(void) {
+    // Configurazione del registro UICR hardware permanente (Flash NVMC)
     if (NRF_UICR->APPROTECT != 0x00000000) {
         NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Wen << NVMC_CONFIG_WEN_Pos;
         while (NRF_NVMC->READY == NVMC_READY_READY_Busy);
@@ -88,8 +103,20 @@ void nelo_hw_enforce_approtect(void) {
         NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Ren << NVMC_CONFIG_WEN_Pos;
         while (NRF_NVMC->READY == NVMC_READY_READY_Busy);
 
+        // Forza un reset di sistema per applicare le modifiche dell'UICR
         NVIC_SystemReset();
     }
+
+    // Blindatura a livello di runtime del core per bloccare attacchi di fault injection sul bus di boot
+    // Se APPROTECT nell'UICR è attivo (0x00), il firmware DEVE forzare l'abilitazione sul blocco logico.
+    #ifdef NRF_APPROTECT_HAS_LATCH
+        if (NRF_APPROTECT->FORCEDISABLE == APPROTECT_FORCEDISABLE_FORCEDISABLE_ForceDisable) {
+            NRF_APPROTECT->FORCEDISABLE = APPROTECT_FORCEDISABLE_FORCEDISABLE_Disabled;
+        }
+    #else
+        // Mapping standard per i registri di controllo runtime di APPROTECT su core Cortex
+        NRF_APPROTECT->DISABLE = 0x00000000; 
+    #endif
 }
 
 /**
@@ -133,7 +160,7 @@ void nelo_hw_cryptocell_enable(void) {
  * @brief EXECUTION PIPELINE (Lockdown di Sicurezza del Nodo)
  */
 void nelo_sensor_security_lockdown(void) {
-    nelo_hw_enforce_approtect();     // Fase 1: Blocco SWD
+    nelo_hw_enforce_approtect();     // Fase 1: Blocco SWD Hardened
     nelo_hw_trng_init();             // Fase 2: Entropia
     nelo_hw_timer_oblivion_init();   // Fase 3: Finestra temporale 120ms
     nelo_hw_cryptocell_enable();     // Fase 4: Enclave CryptoCell
