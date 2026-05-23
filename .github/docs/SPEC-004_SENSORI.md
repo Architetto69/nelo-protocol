@@ -94,7 +94,7 @@ A questo punto la struttura formale della SPEC-004 è definita in ogni suo vinco
 #define BIOMETRIC_BUFFER_SIZE     64
 // Ogni interazione con il buffer deve essere protetta da barriere di memoria o disattivazione
 // temporanea degli interrupt dell'ADC durante la lettura/scrittura del Motore di Sintesi
-static uint16_t biometric_raw_buffer[BIOMETRIC_BUFFER_SIZE] __attribute__((aligned(4)));
+static volatile uint16_t biometric_raw_buffer[BIOMETRIC_BUFFER_SIZE] __attribute__((aligned(4)));
 static volatile uint8_t buffer_index = 0;
 
 /**
@@ -126,7 +126,7 @@ void nelo_hw_enforce_approtect(void) {
 /**
  * @brief 2. INIZIALIZZAZIONE DEL TIMER CRITICO (Finestra di distruzione a 120ms)
  * @details Configura il TIMER1 in modalità hardware pura per scattare esattamente 
- *          ogni 120 millisecondi, invocando un Interrupt Non Mascherabile (NMI).
+ *          ogni 120 millisecondi, invocando un Interrupt a priorità assoluta zero.
  */
 void nelo_hw_timer_oblivion_init(void) {
     NRF_TIMER1->MODE = TIMER_MODE_MODE_Timer;       // Modalità Timer
