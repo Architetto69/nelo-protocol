@@ -1,6 +1,6 @@
 /**
  * @file nelo_damage_synthesis.c
- * @brief Motore di sintesi deterministico in virgola fissa per l'Indice di Danno D.
+ * @brief Motore di sintesi deterministico in virgola fissa Q16.16 con arrotondamento convergente per l'Indice di Danno D.
  * @note Ottimizzato per nRF52840 (Cortex-M4). Implementazione SPEC-004 Sezione 3.
  * @version 3.1-HARDENED
  */
