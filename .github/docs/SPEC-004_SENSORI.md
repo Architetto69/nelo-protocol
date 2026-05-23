@@ -185,7 +185,7 @@ void TIMER1_IRQHandler(void) {
         // Congela l'EasyDMA
         NRF_SAADC->TASKS_STOP = 1;
         while (NRF_SAADC->EVENTS_STOPPED == 0) // Attesa bloccante harware
-        NRF_SAADC->EVENTS_STOPPED == 1;
+        NRF_SAADC->EVENTS_STOPPED = 1;
 
         uint8_t *raw_ptr = (uint8_t *)biometric_raw_buffer;
         size_t buffer_bytes = BIOMETRIC_BUFFER_SIZE * sizeof(uint16_t);
@@ -265,25 +265,15 @@ void nelo_sensor_security_lockdown(void) {
 #define EXP_SAMPLES    5         // Finestra media mobile (~5 secondi a 1Hz)
 
 // Pesi hardware della funzione di trasferimento (Q16.16)
-#define WEIGHT_ALPHA   (2 * F_ONE)      // Conduttanza Cutanea (G)
-#define WEIGHT_BETA    (2.5 * F_ONE)    // Variabilità Cardiaca (V_hrv)
-#define WEIGHT_GAMMA   (3 * F_ONE)      // Velocità Crollo Termico (dT/dt)
-#define WEIGHT_OMEGA   (5 * F_ONE)      // Fattore di rinforzo geometrico simultaneo
-#define BIAS_DELTA     (3 * F_ONE)      // Offset difensivo di sbarramento
-
-// Strutture dati per l'analisi differenziale transitoria
-typedef struct {
-    uint32_t history[EXP_SAMPLES];
-    uint8_t  index;
-    uint32_t sum;
-    bool     primed;
-} baseline_t;
-
-static baseline_t temp_base;
+#define WEIGHT_ALPHA   (131072)  // 2.0 in Q16.16: Conduttanza Cutanea (G)
+#define WEIGHT_BETA    (163840)  // 2.5 in Q16.16: Variabilità Cardiaca (V_hrv)
+#define WEIGHT_GAMMA   (196608)  // 3.0 in Q16.16: Velocità Crollo Termico (dT/dt)
+#define BIAS_DELTA     (196608)  // 3.0 in Q16.16: Offset difensivo di sbarramento
 
 /**
-/**
- * @brief Approssimazione polinomiale veloce della sigmoide: 1 / (1 + e^-x)
+ * @brief Approssimazione polinomiale sicura della sigmoide: 1 / (1 + e^-x)
+ * @details Previene l'overflow a 32 bit espandendo i quadrati intermedi a 64 bit.
+ *          Garantisce l'assenza di inversioni di segno sotto carichi limite.
  * @param x Valore di input in formato fixed-point Q16.16
  * @return Output Q16.16 limitato rigorosamente nell'intervallo [0, F_ONE]
  */
@@ -291,17 +281,56 @@ static int32_t nelo_fast_sigmoid(int32_t x) {
     if (x < -5 * F_ONE) return 0;
     if (x > 5 * F_ONE) return F_ONE;
     
+    int64_t x_64 = x;
     int32_t e_x;
+    
     if (x >= 0) {
-        e_x = F_ONE + x + ((x * x) >> 17); // 1 + x + x^2/2
-        return F_ONE - (F_ONE * F_ONE) / (F_ONE + e_x);
+        // e^x ~= 1 + x + (x^2 / 2)
+        // Spostiamo lo shift per allineare il quadrato da Q32.32 a Q16.16: >> 16, più un extra >> 1 per la divisione per 2 (totale >> 17)
+        e_x = F_ONE + x + (int32_t)((x_64 * x_64) >> 17);
+        
+        // 1 - 1/(1+e_x) per l'ala positiva
+        int64_t num = (int64_t)F_ONE * F_ONE;
+        return F_ONE - (int32_t)(num / (F_ONE + e_x));
     } else {
         int32_t abs_x = -x;
-        e_x = F_ONE + abs_x + ((abs_x * abs_x) >> 17);
-        return (F_ONE * F_ONE) / (F_ONE + e_x);
+        int64_t abs_x_64 = abs_x;
+        
+        e_x = F_ONE + abs_x + (int32_t)((abs_x_64 * abs_x_64) >> 17);
+        int64_t num = (int64_t)F_ONE * F_ONE;
+        return (int32_t)(num / (F_ONE + e_x));
     }
 }
 
+/**
+ * @brief Calcolo deterministico dell'Indice di Danno D (SPEC-004 Sezione 3.1)
+ * @param raw_g Conduttanza cutanea normalizzata [0, F_ONE]
+ * @param raw_v_hrv HRV normalizzato [0, F_ONE] (1.0 = massima calma, 0.0 = shock)
+ * @param raw_dt Gradiente termico normalizzato [0, F_ONE]
+ * @return Intero a 16 bit a virgola fissa [0, 65535] pronto per il Payload AEAD
+ */
+uint16_t nelo_compute_damage_index(int32_t raw_g, int32_t raw_v_hrv, int32_t raw_dt) {
+    // Calcolo dei singoli contributi pesati (espansione temporanea a 64 bit per evitare overflow da prodotto)
+    int64_t g_contrib = ((int64_t)raw_g * WEIGHT_ALPHA) >> 16;
+    
+    // Inversione della variabilità cardiaca: lo stress aumenta al diminuire di V_hrv
+    int32_t v_inv = F_ONE - raw_v_hrv;
+    int64_t v_contrib = ((int64_t)v_inv * WEIGHT_BETA) >> 16;
+    
+    int64_t dt_contrib = ((int64_t)raw_dt * WEIGHT_GAMMA) >> 16;
+    
+    // Combinazione lineare dell'argomento della sigmoide: z = a*G + b*(1-V) + g*dT - delta
+    int32_t z = (int32_t)(g_contrib + v_contrib + dt_contrib - BIAS_DELTA);
+    
+    // Passaggio attraverso la funzione di attivazione sigmoidale hardened
+    int32_t d_q16 = nelo_fast_sigmoid(z);
+    
+    // Mappatura finale da Q16.16 a Uint16 a virgola fissa [0, 65535] per il pacchetto radio
+    if (d_q16 >= F_ONE) return 0xFFFF;
+    if (d_q16 <= 0)      return 0x0000;
+    
+    return (uint16_t)((d_q16 * 65535) >> 16);
+}
 /**
  * @brief Calcola la velocità di crollo termico isolandola dalla temperatura ambiente
  * @param t_skin_raw Temperatura cutanea attuale (es: 3350 = 33.5°C)
