@@ -36,56 +36,53 @@ static uint8_t i2c_wipe_cmd[2] __attribute__((aligned(4))) = {0x04, 0x40};
  * @brief INTERRUPT HANDLER TIMER1: Obliterazione totale (120ms) con protezione da stallo
  */
 void TIMER1_IRQHandler(void) {
-    if (NRF_TIMER1->EVENTS_COMPARE[0] == 1) {
+    // Doppia verifica per mitigare il salto dell'istruzione condizionale via glitching
+    if (NRF_TIMER1->EVENTS_COMPARE[0] == 1 && NRF_TIMER1->EVENTS_COMPARE[0] != 0) {
         NRF_TIMER1->EVENTS_COMPARE[0] = 0;
 
-        // 1. Congela EasyDMA del modulo I2C con timeout di sicurezza
-        NRF_TWIM0->TASKS_STOP = 1;
-        uint32_t timeout = TIMEOUT_MAX_LOOPS;
-        while ((NRF_TWIM0->EVENTS_STOPPED == 0) && (--timeout > 0));
-        NRF_TWIM0->EVENTS_STOPPED = 0;
-
-        // Disattivazione forzata del modulo per sganciare i puntatori AHB di EasyDMA
+        // Isola IMMEDIATAMENTE l'interfaccia TWIM spegnendo il modulo
+        // Questo interrompe i bus master AHB legati a EasyDMA a prescindere dallo stato dei task
         NRF_TWIM0->ENABLE = (TWIM_ENABLE_ENABLE_Disabled << TWIM_ENABLE_ENABLE_Pos);
+        NRF_TWIM0->TASKS_STOP = 1;
 
-        // 2. Wipe distruttivo della RAM locale
-        uint8_t *raw_ptr = (uint8_t *)biometric_raw_buffer;
+        // 2. Wipe distruttivo della RAM locale (Inversione dei bit di sfoltimento)
+        uint32_t *raw_ptr32 = (uint32_t *)biometric_raw_buffer;
         if (entropy_pool_index >= BIOMETRIC_BUFFER_SIZE) {
-            for (size_t i = 0; i < BIOMETRIC_BUFFER_SIZE; i++) {
-                raw_ptr[i] = entropy_pool[i];
+            for (size_t i = 0; i < (BIOMETRIC_BUFFER_SIZE / 4); i++) {
+                raw_ptr32[i] = ((uint32_t *)entropy_pool)[i];
             }
         } else {
-            for (size_t i = 0; i < BIOMETRIC_BUFFER_SIZE; i++) {
-                raw_ptr[i] = 0x55; // Pattern di sfoltimento alternato
+            // Pattern alternato ad alta transizione di stato (0x55AA55AA) per scaricare i nodi di memoria
+            for (size_t i = 0; i < (BIOMETRIC_BUFFER_SIZE / 4); i++) {
+                raw_ptr32[i] = 0x55AA55AA; 
             }
         }
         entropy_pool_index = 0;
 
-        // Ripristina il modulo I2C per l'invio del comando di pulizia esterna
+        // Ripristina il modulo per il comando esterno di Wipe
         NRF_TWIM0->ENABLE = (TWIM_ENABLE_ENABLE_Enabled << TWIM_ENABLE_ENABLE_Pos);
 
-        // 3. Reset FIFO esterno (Puntatore rigorosamente in RAM)
+        // 3. Reset FIFO esterno
         NRF_TWIM0->ADDRESS = MAX30102_ADDR;
         NRF_TWIM0->TXD.PTR = (uint32_t)i2c_wipe_cmd; 
         NRF_TWIM0->TXD.MAXCNT = 2;
         NRF_TWIM0->TASKS_STARTTX = 1;
         
-        // Sincronizzazione protetta: attendi che l'intero byte sia trasmesso fisicamente sul bus
-        timeout = TIMEOUT_MAX_LOOPS;
+        uint32_t timeout = TIMEOUT_MAX_LOOPS;
         while ((NRF_TWIM0->EVENTS_LASTTX == 0) && (--timeout > 0));
         NRF_TWIM0->EVENTS_LASTTX = 0;
 
-        // Genera STOP sul bus per chiudere la sessione fisica ed evitare di lasciare linee flottanti
         NRF_TWIM0->TASKS_STOP = 1;
         timeout = TIMEOUT_MAX_LOOPS;
         while ((NRF_TWIM0->EVENTS_STOPPED == 0) && (--timeout > 0));
         NRF_TWIM0->EVENTS_STOPPED = 0;
 
-        // Barriere di memoria per stabilizzare la pipeline d'esecuzione
+        // Forza la sincronizzazione della pipeline d'esecuzione ed esclude ottimizzazioni out-of-order della CPU
         __DSB();
         __ISB();
     }
 }
+
 
 /**
  * @brief 1. ATTIVAZIONE HARDENED DI APPROTECT (Blocco hardware del Debugger SWD)
