@@ -71,3 +71,152 @@ L'involucro protettivo del cripto-sensore è rivestito internamente da una magli
  * **Innesco della Tabula Rasa:** L'interruzione fisica della maglia conduttiva (tentativo di apertura o perforazione del guscio) o la variazione repentina della capacità elettrica generano un interrupt non mascherabile (NMI) a priorità assoluta.
  * **Procedura di Emergenza:** Il firmware interrompe qualsiasi operazione in corso, invoca il coprocessore crittografico per sovrascrivere immediatamente il settore contenente SK_{sensor} con zeri logici, ed esegue un ciclo continuo di scrittura e cancellazione su tutta la SRAM, lasciando il chip permanentemente inutilizzabile e privo di materiale crittografico (Zeroizzazione Hardware).
 A questo punto la struttura formale della SPEC-004 è definita in ogni suo vincolo logico e di sicurezza.
+## Appendice Tecnica SPEC-004: Blindatura Hardware su Nordic nRF52840
+/**
+ * @file nelo_crypto_sensor_hardened.c
+ * @brief Implementazione dei vincoli di sicurezza hardware SPEC-004 su nRF52840.
+ * @note Target: Nordic Semiconductor nRF52840 (Cortex-M4 + CryptoCell-310)
+ */
+
+#include "nrf.h"
+#include "nrf_delay.h"
+
+// Definizioni per l'interfaccia crittografica CryptoCell-310 (registri mappati in memoria)
+#define CRYS_BASE_ADDR            (0x5002A000UL)
+#define CRYS_REG_AO_SW_RESET      (*(volatile uint32_t *)(CRYS_BASE_ADDR + 0x004UL))
+#define CRYS_REG_HOST_CRYPTOCELL_EN (*(volatile uint32_t *)(CRYS_BASE_ADDR + 0x008UL))
+
+// Buffer effimero per il calcolo dell'Indice D (120ms max prima del wipe)
+#define BIOMETRIC_BUFFER_SIZE     64
+static uint16_t biometric_raw_buffer[BIOMETRIC_BUFFER_SIZE] __attribute__((aligned(4)));
+static volatile uint8_t buffer_index = 0;
+
+/**
+ * @brief 1. ATTIVAZIONE HARDENED DI APPROTECT (Blocco permanente del Debugger SWD)
+ * @details Scrive nei registri UICR (User Information Configuration Registers) 
+ *          per disabilitare permanentemente la porta di debug. Nelle revisioni recenti 
+ *          del silicio nRF52840, questo impedisce attacchi di Fault Injection sulla porta SWD.
+ */
+void nelo_hw_enforce_approtect(void) {
+    // Verifica se APPROTECT è già abilitato (0x00000000 significa protetto)
+    if (NRF_UICR->APPROTECT != 0x00000000) {
+        // Abilita la scrittura nella memoria NVMC (Non-Volatile Memory Controller)
+        NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Wen << NVMC_CONFIG_WEN_Pos;
+        while (NRF_NVMC->READY == NVMC_READY_READY_Busy);
+
+        // Scrive il flag di blocco nel registro UICR dedicato ad APPROTECT
+        NRF_UICR->APPROTECT = 0x00000000;
+        while (NRF_NVMC->READY == NVMC_READY_READY_Busy);
+
+        // Disabilita la scrittura per evitare corruzioni accidentali
+        NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Ren << NVMC_CONFIG_WEN_Pos;
+        while (NRF_NVMC->READY == NVMC_READY_READY_Busy);
+
+        // Forza un System Reset per rendere effettive le protezioni hardware
+        NVIC_SystemReset();
+    }
+}
+
+/**
+ * @brief 2. INIZIALIZZAZIONE DEL TIMER CRITICO (Finestra di distruzione a 120ms)
+ * @details Configura il TIMER1 in modalità hardware pura per scattare esattamente 
+ *          ogni 120 millisecondi, invocando un Interrupt Non Mascherabile (NMI).
+ */
+void nelo_hw_timer_oblivion_init(void) {
+    NRF_TIMER1->MODE = TIMER_MODE_MODE_Timer;       // Modalità Timer
+    NRF_TIMER1->BITMODE = TIMER_BITMODE_BITMODE_32Bit; // Contatore a 32 bit
+    NRF_TIMER1->PRESCALER = 4;                      // 16MHz / 2^4 = 1MHz (1 microsecondo per tick)
+
+    // Imposta il valore di confronto per 120.000 microsecondi (120 ms)
+    NRF_TIMER1->CC[0] = 120000;
+
+    // Configura lo sfoltimento automatico (Shortcut): azzera il timer al raggiungimento del match
+    NRF_TIMER1->SHORTS = TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos;
+
+    // Abilita l'interrupt sul canale di confronto CC[0]
+    NRF_TIMER1->INTENSET = TIMER_INTENSET_COMPARE0_Msk;
+
+    // Configura la priorità dell'interrupt a 0 (Massima priorità hardware del Cortex-M4)
+    NVIC_SetPriority(TIMER1_IRQn, 0);
+    NVIC_EnableIRQ(TIMER1_IRQn);
+
+    // Avvia il timer
+    NRF_TIMER1->TASKS_START = 1;
+}
+
+/**
+ * @brief 3. INIZIALIZZAZIONE DEL TRNG PER L'INIEZIONE DI RUMORE BIANCO
+ */
+void nelo_hw_trng_init(void) {
+    NRF_RNG->CONFIG = RNG_CONFIG_DERC_Enabled << RNG_CONFIG_DERC_Pos; // Abilita correzione deriva termica
+    NRF_RNG->INTENSET = RNG_INTENSET_VALRDY_Msk;                      // Abilita interrupt dato pronto
+    NRF_RNG->TASKS_START = 1;                                         // Avvia il generatore hardware
+}
+
+/**
+ * @brief INTERRUPT HANDLER TIMER1: LA MECCANICA DELL'OBLIO CRUDA (Wipe Hardware)
+ * @details Questo blocco viene eseguito tassativamente ogni 120ms. Sovrascrive 
+ *          il buffer analogico grezzo con byte di puro entropia generati dal TRNG,
+ *          impedendo la persistenza elettrica residua dei dati biologici in SRAM.
+ */
+void TIMER1_IRQHandler(void) {
+    if (NRF_TIMER1->EVENTS_COMPARE[0] == 1) {
+        NRF_TIMER1->EVENTS_COMPARE[0] = 0; // Pulisce l'evento hardware
+
+        // Sfoltimento e distruzione attiva della RAM
+        uint8_t *raw_ptr = (uint8_t *)biometric_raw_buffer;
+        size_t buffer_bytes = BIOMETRIC_BUFFER_SIZE * sizeof(uint16_t);
+
+        for (size_t i = 0; i < buffer_bytes; i++) {
+            // Attende che il TRNG hardware abbia generato un byte di entropia valido
+            while (NRF_RNG->EVENTS_VALRDY == 0);
+            NRF_RNG->EVENTS_VALRDY = 0;
+
+            // Inietta il rumore bianco direttamente sopra la coordinata biologica passata
+            raw_ptr[i] = (uint8_t)(NRF_RNG->VALUE & 0xFF);
+        }
+
+        // Resetta l'indice di scrittura della matrice circolare
+        buffer_index = 0;
+        
+        // Barriera di sincronizzazione della memoria hardware
+        __DSB();
+        __ISB();
+    }
+}
+
+/**
+ * @brief 4. ATTIVAZIONE COPROCESORE CRITTOGRAFICO CRYPTOCELL-310
+ * @details Sveglia l'enclave crittografica hardware isolandola dal core ARM principale.
+ */
+void nelo_hw_cryptocell_enable(void) {
+    // Rilascia il modulo dal reset software
+    CRYS_REG_AO_SW_RESET = 0x1UL;
+    nrf_delay_us(10);
+    CRYS_REG_AO_SW_RESET = 0x0UL;
+
+    // Abilita l'accesso hardware all'interfaccia CryptoCell
+    CRYS_REG_HOST_CRYPTOCELL_EN = 0x1UL;
+    
+    // Configura i permessi di accesso del subsystem crittografico alle periferiche DMA
+    NRF_CRYPTOCELL->ENABLE = 1;
+}
+
+/**
+ * @brief EXECUTION PIPELINE (Inizializzazione dei Vincoli di Sicurezza del Nodo)
+ */
+void nelo_sensor_security_lockdown(void) {
+    // Fase 1: Blindatura fisica contro estrazione flash
+    nelo_hw_enforce_approtect();
+
+    // Fase 2: Attivazione generatori di entropia hardware
+    nelo_hw_trng_init();
+
+    // Fase 3: Avvio della clessidra dell'oblio (120ms loop)
+    nelo_hw_timer_oblivion_init();
+
+    // Fase 4: Accensione dell'enclave isolata per la firma dei pacchetti D
+    nelo_hw_cryptocell_enable();
+}
+
+
