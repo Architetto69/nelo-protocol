@@ -74,12 +74,17 @@ L'involucro protettivo del cripto-sensore è rivestito internamente da una magli
  * **Innesco della Tabula Rasa:** L'interruzione fisica della maglia conduttiva (tentativo di apertura o perforazione del guscio) o la variazione repentina della capacità elettrica generano un interrupt non mascherabile (NMI) a priorità assoluta.
  * **Procedura di Emergenza:** Il firmware interrompe qualsiasi operazione in corso, invoca il coprocessore crittografico per sovrascrivere immediatamente il settore contenente SK_{sensor} con zeri logici, ed esegue un ciclo continuo di scrittura e cancellazione su tutta la SRAM, lasciando il chip permanentemente inutilizzabile e privo di materiale crittografico (Zeroizzazione Hardware).
 A questo punto la struttura formale della SPEC-004 è definita in ogni suo vincolo logico e di sicurezza.
+
 ## Appendice Tecnica SPEC-004: Blindatura Hardware su Nordic nRF52840
-[file nelo_crypto_sensor_hardened.c](../src/file nelo_crypto_sensor_hardened.c)
+[nelo_crypto_sensor_hardened.c](../src/nelo_crypto_sensor_hardened.c)
 - Implementazione dei vincoli di sicurezza hardware SPEC-004 su nRF52840.
 - Target: Nordic Semiconductor nRF52840 (Cortex-M4 + CryptoCell-310)
 - version 3.1-HARDENED
 
+[nelo_damage_synthesis.c](../src/nelo_damage_synthesis.c)
+- Motore di sintesi deterministico in virgola fissa per l'Indice di Danno D.
+- Ottimizzato per nRF52840 (Cortex-M4). Implementazione SPEC-004 Sezione 3.
+- version 3.1-HARDENED
 
 ## Mappatura Finale dell'Integrazione Hardware (I^2C)
 <pre>
