@@ -1,8 +1,19 @@
-# Tempo limite dopo il quale la PRIVATE_RAM viene azzerata, garantendo l'anonimato attraverso l'effimerità
-Decay_Interval=120ms
+# ==============================================================================
+# NELO v3.1-HARDENED: CORE SYSTEM INITIAL PARAMETERS
+# ==============================================================================
 
-# Latenza base iniettata per ogni operazione che supera la soglia di rischio RI > 0.7
-Friction_Factor=0.5s
+# [MECCANICA DELL'OBLIO - SPEC-003]
+# Tempo limite assoluto dopo il quale la SHADOW_BUFFER e la PRIVATE_RAM vengono 
+# azzerate tramite wipe hardware TRNG, garantendo l'effimerità totale dei dati.
+DECAY_INTERVAL_MS=120
 
-Soglia di consenso bizantino necessaria per scalare le contromisure a livello globale
-Quorum_Requirement=2/3
+# [FRIZIONE DIFENSIVA - DETEZIONE ANOMALIE]
+# Latenza artificiale base iniettata per rallentare le risposte a livello hardware
+# ogni volta che l'Indice di Rischio calcolato supera la soglia critica (RI > 0.7).
+FRICTION_FACTOR_MS=500
+
+# [TOLLERANZA BIZANTINA - SPEC-002]
+# Numero minimo assoluto di firme valide richieste su un pool di estrazione fissa (N=127).
+# Corrisponde alla formula crittografica blindata: floor(2/3 * 127) + 1.
+QUORUM_REQUIREMENT_NODES=85
+QUORUM_POOL_TOTAL=127
