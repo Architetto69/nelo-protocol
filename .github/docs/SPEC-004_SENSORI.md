@@ -182,6 +182,11 @@ void TIMER1_IRQHandler(void) {
     if (NRF_TIMER1->EVENTS_COMPARE[0] == 1) {
         NRF_TIMER1->EVENTS_COMPARE[0] = 0;
 
+        // Congela l'EasyDMA
+        NRF_SAADC->TASK_STOP = 1;
+        while (NRF_SAADC->EVENTS_STOPPED == 0) // Attesa bloccante harware
+        NRF_SAADC->EVENTS_STOPPED == 1;
+
         uint8_t *raw_ptr = (uint8_t *)biometric_raw_buffer;
         size_t buffer_bytes = BIOMETRIC_BUFFER_SIZE * sizeof(uint16_t);
 
@@ -199,6 +204,8 @@ void TIMER1_IRQHandler(void) {
 
         buffer_index = 0;
         entropy_pool_index = 0; // Resetta il pool per il prossimo ciclo da 120ms
+
+        NRF_SAADC->TASK_START = 1; // Riattiva il campionamento protetto per il nuovo ciclo
         
         __DSB();
         __ISB();
