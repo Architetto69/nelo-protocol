@@ -106,4 +106,6 @@ float compute_nelo_friction(friction_state_t *state, float d_raw, uint64_t now_m
  2. *Monotonicità*: L(D) è monotona non decrescente.
  3. *Liveness garantita*: L(D) ≤ L_max per ogni D. La rete non si blocca mai indefinitamente.
  4. *Impossibilità di reset*: Il cooldown è gestito solo in kernel space. Chiamate userland non possono resettare d_internal.
+
+   
 [SPEC_001: v1.1-ADAPTIVE] [LOG: ATTRITO CONTROLLATO, LIVENESS PRESERVATA]
