@@ -54,8 +54,8 @@ NELO MUST NOT:
 3. Mantenere identità persistenti non necessarie
 4. Operare senza tracciabilità
 
-Qui il [THREAT MODEL](https://github.com/Architetto69/nelo-protocol/blob/main/THREAT_MODEL.md),
-qui il [BACKOFF LOGARITMICO](https://github.com/Architetto69/nelo-protocol/blob/main/.github/docs/SPEC-001_BACKOFF.md)
+Qui il [THREAT MODEL](../../THREAT_MODEL.md),
+qui il [BACKOFF LOGARITMICO](./SPEC-001_BACKOFF.md)
 
 ---
 
