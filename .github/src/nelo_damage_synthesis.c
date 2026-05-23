@@ -34,7 +34,7 @@ static int32_t nelo_fixed_sigmoid_hardened(int32_t z) {
 
     // Calcolo ottimizzato per preservare la linearità dell'LSB.
     // Trasliamo la retta di calcolo prima della divisione distruttiva.
-    int64_t num = ((int64_t)z) << 15; // Shift ridotto per integrare lo shift del riscalamento (>> 1)
+    int64_t num = ((int64_t)z) << 15; // Shift ridotto per integrare nativamente il riscalamento (>> 1)
     int32_t den = F_ONE + abs_z;
     int32_t intermediate = (int32_t)(num / den);
 
