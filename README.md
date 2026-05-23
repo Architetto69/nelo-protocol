@@ -13,7 +13,7 @@ di un'autorità intenzionale autonoma.
 
 Principio: il male non si abolisce, si manda fuori budget.
 
-Questo repo contiene solo la [specifica](./SPEC.md) e la [testimonianza](./TESTIMONY.md). Nessuna implementazione di riferimento. Nessun leader. Nessun token.
+Questo repo contiene solo la [specifica](./SPEC.md) e la [testimonianza](./TESTIMONY.md). Nessun leader. Nessun token.
 
 # NON-CLAIM
 Questo documento non afferma:
