@@ -40,6 +40,6 @@ Non abbiamo rimosso il male dal cuore dell'uomo; abbiamo rimosso le leve che per
 
 ---
 ## DOCS:
-[TESTIMONY](../../TESTIMONY.md) | [RFC.NELO-v3.1-HARDENED](../../docs/RFC-NELO-v3.1-HARDENED.md) | [SPEC-001](../../docs/SPEC-001_BACKOFF.md) | [SPEC-002](../../docs/SPEC-002_QUORUM.md) | [SPEC-003](../../docs/SPEC-003_OBLIO.md) | [SPEC-004](../../docs/SPEC-004_SENSORI.md)
+[TESTIMONY](./TESTIMONY.md) | [RFC.NELO-v3.1-HARDENED](.github/docs/RFC-NELO-v3.1-HARDENED.md) | [SPEC-001](.github/docs/SPEC-001_BACKOFF.md) | [SPEC-002](.github/docs/SPEC-002_QUORUM.md) | [SPEC-003](.github/docs/SPEC-003_OBLIO.md) | [SPEC-004](.github/docs/SPEC-004_SENSORI.md)
 
 [STATUS: OPERATIONAL_FRICTION] [MODE: SYSTEMIC_INERTIA] [SCALABILITY: BLOCKED] [LOG: IL COSTO DEL POTERE È LA NOSTRA DIFESA.]
