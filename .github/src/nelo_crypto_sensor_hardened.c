@@ -1,6 +1,6 @@
 /**
  * @file nelo_crypto_sensor_hardened.c
- * @brief Implementazione dei vincoli di sicurezza hardware SPEC-004 su nRF52840.
+ * @brief Gestione interrupt a priorità zero, isolamento EasyDMA, attivazione APPROTECT (Rev3) e interruzione SWD.
  * @note Target: Nordic Semiconductor nRF52840 (Cortex-M4 + CryptoCell-310)
  * @version 3.1-HARDENED
  */
