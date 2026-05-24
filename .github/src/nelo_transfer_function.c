@@ -120,7 +120,7 @@ uint32_t nelo_calculate_d_index(int32_t s_g, int32_t s_v, int16_t t_skin) {
     int32_t s_v_stress = F_ONE - s_v;
 
     // 2. Anomalia termica differenziale
-    int32_t s_delta_t = process_thermal_anomaly/t_skin;
+    int32_t s_delta_t = process_thermal_anomaly(t_skin);
 
     // 3. Somma lineare pesata
     int64_t linear_sum = ((int64_t)WEIGHT_ALPHA * s_g) +
