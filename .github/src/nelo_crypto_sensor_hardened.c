@@ -162,3 +162,32 @@ void nelo_sensor_security_lockdown(void) {
     nelo_hw_timer_oblivion_init();   // Fase 3: Finestra temporale 120ms
     nelo_hw_cryptocell_enable();     // Fase 4: Enclave CryptoCell
 }
+/**
+ * @brief RNG INTERRUPT HANDLER: Riempimento continuo entropy_pool
+ * @note  Ogni evento VALRDY fornisce 1 word di rumore hardware dal TRNG.
+ *        L'ISR scrive direttamente in entropy_pool per il prossimo ciclo di wipe.
+ */
+void RNG_IRQHandler(void)
+{
+    if (NRF_RNG->EVENTS_VALRDY)
+    {
+        NRF_RNG->EVENTS_VALRDY = 0;
+
+        // Scrittura atomica della word casuale nel pool circolare
+        uint32_t random_word = NRF_RNG->VALUE;
+        ((uint32_t *)entropy_pool)[entropy_pool_index / 4] = random_word;
+
+        // Avanza indice circolare di 4 byte
+        entropy_pool_index += 4;
+        if (entropy_pool_index >= BIOMETRIC_BUFFER_SIZE)
+        {
+            entropy_pool_index = 0;
+        }
+
+        // Se il pool è pieno, fermiamo il TRNG per risparmiare energia
+        if (entropy_pool_index == 0)
+        {
+            NRF_RNG->TASKS_STOP = 1;
+        }
+    }
+}
