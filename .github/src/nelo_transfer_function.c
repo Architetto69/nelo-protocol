@@ -143,3 +143,51 @@ uint32_t nelo_calculate_d_index(int32_t s_g, int32_t s_v, int16_t t_skin) {
     return (uint32_t)nelo_fast_sigmoid(z);
 }
 
+/**
+ * @brief Wrapper pubblico: calcola D e lo mappa a uint16_t per trasmissione
+ * @param s_g Punteggio conduttanza Q16.16 [0, F_ONE]
+ * @param s_v Punteggio HRV calma Q16.16 [0, F_ONE]
+ * @param t_skin Temperatura cutanea TMP117 nativa int16_t
+ * @param[out] triggered Set a true se D >= 0.7, altrimenti false. Può essere NULL
+ * @return D in Q0.16 [0, 65535]
+ */
+uint16_t nelo_get_damage_index_u16(int32_t s_g, int32_t s_v, int16_t t_skin, bool *triggered)
+{
+    uint32_t d_q16 = nelo_calculate_d_index(s_g, s_v, t_skin);
+
+    // Mapping Q16.16 -> Q0.16 con arrotondamento convergente
+    uint32_t d_u16 = (d_q16 + (F_ONE >> 1)) >> 16;
+    if (d_u16 > 65535) d_u16 = 65535;
+
+    const uint32_t THRESHOLD_Q16 = (uint32_t)(0.7f * F_ONE); // 45875
+    bool is_triggered = (d_q16 >= THRESHOLD_Q16);
+
+    if (triggered) {
+        *triggered = is_triggered;
+    }
+
+    // Reset baseline termica dopo trigger per evitare memoria storica contaminata
+    if (is_triggered) {
+        temp_base.primed = false;
+        temp_base.sum = 0;
+        temp_base.index = 0;
+        for (int i = 0; i < EXP_SAMPLES; i++) {
+            temp_base.history[i] = 0;
+        }
+    }
+
+    return (uint16_t)d_u16;
+}
+
+/**
+ * @brief Reset esplicito della baseline termica. Usalo al boot e dopo wipe
+ */
+void nelo_reset_thermal_baseline(void)
+{
+    temp_base.primed = false;
+    temp_base.sum = 0;
+    temp_base.index = 0;
+    for (int i = 0; i < EXP_SAMPLES; i++) {
+        temp_base.history[i] = 0;
+    }
+}
