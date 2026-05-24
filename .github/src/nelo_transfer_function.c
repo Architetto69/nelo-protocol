@@ -111,27 +111,6 @@ static int32_t process_thermal_anomaly(uint16_t t_skin_raw) {
 }
 
 /**
- * @brief FUNZIONE DI TRASFERIMENTO CRITTOGRAFICA - INDICE D
- */
-uint32_t nelo_calculate_d_index(int32_t s_g, int32_t s_v, uint16_t t_skin) {
-    int32_t s_delta_t = process_thermal_anomaly(t_skin);
-
-    int64_t linear_sum = ((int64_t)WEIGHT_ALPHA * s_g) + 
-                         ((int64_t)WEIGHT_BETA * s_v) + 
-                         ((int64_t)WEIGHT_GAMMA * s_delta_t);
-    linear_sum >>= 16; 
-
-    int64_t cross_product = ((int64_t)s_g * s_v) >> 16;
-    cross_product = (cross_product * s_delta_t) >> 16;
-    
-    int64_t reinforcement_term = (cross_product * WEIGHT_OMEGA) >> 16;
-    int32_t z = (int32_t)(linear_sum + reinforcement_term) - BIAS_DELTA;
-
-    return (uint32_t)nelo_fast_sigmoid(z);
-}
-
-
-/**
  * @brief Calcola la velocità di crollo termico isolandola dalla temperatura ambiente
  * @param t_skin_raw Temperatura cutanea attuale (moltiplicata per 100, es: 3350 = 33.5°C)
  * @return Punteggio di anomalia S_deltaT in formato Q16.16
