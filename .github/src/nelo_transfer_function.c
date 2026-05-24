@@ -111,7 +111,7 @@ static int32_t process_thermal_anomaly(int16_t t_skin_raw) {
  * @param t_skin Temperatura cutanea in centesimi di grado Celsius (es: 3350)
  * @return D in Q16.16 [0, F_ONE]. Soglia di innesco a 45875 = 0.7
  */
-uint32_t nelo_calculate_d_index(int32_t s_g, int32_t s_v, uint16_t t_skin) {
+uint32_t nelo_calculate_d_index(int32_t s_g, int32_t s_v, int16_t t_skin) {
     // Clamping preventivo input
     if (s_g < 0) s_g = 0; else if (s_g > F_ONE) s_g = F_ONE;
     if (s_v < 0) s_v = 0; else if (s_v > F_ONE) s_v = F_ONE;
@@ -120,7 +120,7 @@ uint32_t nelo_calculate_d_index(int32_t s_g, int32_t s_v, uint16_t t_skin) {
     int32_t s_v_stress = F_ONE - s_v;
 
     // 2. Anomalia termica differenziale
-    int32_t s_delta_t = process_thermal_anomaly((int16_t)t_skin);
+    int32_t s_delta_t = process_thermal_anomaly/t_skin;
 
     // 3. Somma lineare pesata
     int64_t linear_sum = ((int64_t)WEIGHT_ALPHA * s_g) +
