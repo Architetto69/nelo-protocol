@@ -59,7 +59,7 @@ static int32_t nelo_fast_sigmoid(int32_t x) {
     int64_t x2 = (x64 * x64) >> 16;
     int64_t x3 = (x2 * x64) >> 16;
     
-    int32_t e_x = F_ONE + x + (int32_t)(x2 >> 1) + (int32_t)(x3 / 6);
+    int32_t e_x = F_ONE + x + (int32_t)(x2 >> 1) + (int32_t)((x3 * 2731) >> 14); // 1/6 ≈ 2731/16384
     int64_t num = (int64_t)F_ONE * F_ONE;
     res = (int32_t)(num / (F_ONE + e_x));
 
