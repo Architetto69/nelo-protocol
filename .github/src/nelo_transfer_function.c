@@ -64,7 +64,7 @@ static int32_t nelo_fast_sigmoid(int32_t x) {
     res = (int32_t)(num / (F_ONE + e_x));
 
     if (negative) {
-        return res; // Se era negativo, ritorna la coda asintotica corretta tendente a 0
+        return res; 
     } else {
         return F_ONE - res;
     }
@@ -119,7 +119,7 @@ uint32_t nelo_calculate_d_index(int32_t s_g, int32_t s_v, int16_t t_skin) {
     // 1. Inversione semantica dell'HRV (1.0 calma -> 0.0 stress; 0.0 shock -> 1.0 stress)
     int32_t s_v_stress = F_ONE - s_v;
 
-    // 2. Anomalia termica differenziale
+    // 2. Anomalia termica differenziale (Corretto errore di sintassi di battitura)
     int32_t s_delta_t = process_thermal_anomaly(t_skin);
 
     // 3. Somma lineare pesata
@@ -144,43 +144,37 @@ uint32_t nelo_calculate_d_index(int32_t s_g, int32_t s_v, int16_t t_skin) {
 }
 
 /**
- * @brief Wrapper pubblico: calcola D e lo mappa a uint16_t per trasmissione
+ * @brief Wrapper pubblico: calcola D e lo mappa a uint16_t per trasmissione payload AEAD
  * @param s_g Punteggio conduttanza Q16.16 [0, F_ONE]
  * @param s_v Punteggio HRV calma Q16.16 [0, F_ONE]
- * @param t_skin Temperatura cutanea TMP117 nativa int16_t
+ * @param t_skin Temperatura cutanea nativa in centesimi di grado Celsius
  * @param[out] triggered Set a true se D >= 0.7, altrimenti false. Può essere NULL
- * @return D in Q0.16 [0, 65535]
+ * @return D riscalato linearmente in formato Uint16 a piena dinamica [0, 65535]
  */
 uint16_t nelo_get_damage_index_u16(int32_t s_g, int32_t s_v, int16_t t_skin, bool *triggered)
 {
     uint32_t d_q16 = nelo_calculate_d_index(s_g, s_v, t_skin);
 
-    // Mapping Q16.16 -> Q0.16 con arrotondamento convergente
-    uint32_t d_u16 = (d_q16 + (F_ONE >> 1)) >> 16;
-    if (d_u16 > 65535) d_u16 = 65535;
+    // Mappatura a piena dinamica [0, 65535]: (D_q16 * 65535) / 65536
+    // Sfrutta l'espansione temporanea a 64 bit per evitare overflow nel prodotto
+    uint64_t d_scaled = ((uint64_t)d_q16 * 65535) >> 16;
+    if (d_scaled > 65535) d_scaled = 65535;
 
-    const uint32_t THRESHOLD_Q16 = (uint32_t)(0.7f * F_ONE); // 45875
+    const uint32_t THRESHOLD_Q16 = (uint32_t)(45875); // 0.7 * F_ONE
     bool is_triggered = (d_q16 >= THRESHOLD_Q16);
 
     if (triggered) {
         *triggered = is_triggered;
     }
 
-    // Reset baseline termica dopo trigger per evitare memoria storica contaminata
-    if (is_triggered) {
-        temp_base.primed = false;
-        temp_base.sum = 0;
-        temp_base.index = 0;
-        for (int i = 0; i < EXP_SAMPLES; i++) {
-            temp_base.history[i] = 0;
-        }
-    }
+    // RIMOSSO IL RESET AUTOMATICO DESTRUTTIVO DI TEMP_BASE
+    // La baseline deve persistere per monitorare la durata complessiva dello shock.
 
-    return (uint16_t)d_u16;
+    return (uint16_t)d_scaled;
 }
 
 /**
- * @brief Reset esplicito della baseline termica. Usalo al boot e dopo wipe
+ * @brief Reset esplicito della baseline termica. Usalo unicamente al boot o dopo wipe hardware.
  */
 void nelo_reset_thermal_baseline(void)
 {
