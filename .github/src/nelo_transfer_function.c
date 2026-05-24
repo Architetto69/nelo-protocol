@@ -107,7 +107,7 @@ static int32_t process_thermal_anomaly(int16_t t_skin_raw) {
 /**
  * @brief Calcolo deterministico dell'Indice di Danno D per SPEC-004 §3.1
  * @param s_g Punteggio conduttanza cutanea Q16.16 [0, F_ONE]
- * @param s_v Punteggio HRV invertito Q16.16 [0, F_ONE]. 1.0 = calma, 0.0 = shock
+ * @param s_v Punteggio HRV calma Q16.16 [0, F_ONE]. 1.0 = calma, 0.0 = shock
  * @param t_skin Temperatura cutanea in centesimi di grado Celsius (es: 3350)
  * @return D in Q16.16 [0, F_ONE]. Soglia di innesco a 45875 = 0.7
  */
