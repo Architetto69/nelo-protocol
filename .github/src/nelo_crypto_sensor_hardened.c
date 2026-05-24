@@ -135,9 +135,15 @@ void nelo_hw_timer_oblivion_init(void) {
 /**
  * @brief 3. INIZIALIZZAZIONE DEL TRNG PER RUMORE BIANCO / ENTROPIA
  */
-void nelo_hw_trng_init(void) {
-    NRF_RNG->CONFIG = RNG_CONFIG_DERC_Enabled << RNG_CONFIG_DERC_Pos; // Correzione deriva termica
+void nelo_hw_trng_init(void)
+{
+    NRF_RNG->CONFIG = RNG_CONFIG_DERC_Enabled << RNG_CONFIG_DERC_Pos;
     NRF_RNG->INTENSET = RNG_INTENSET_VALRDY_Msk;
+    
+    NVIC_SetPriority(RNG_IRQn, 1);  // Priorità inferiore a TIMER1 per non ritardare il wipe
+    NVIC_EnableIRQ(RNG_IRQn);
+    
+    entropy_pool_index = 0;
     NRF_RNG->TASKS_START = 1;
 }
 
