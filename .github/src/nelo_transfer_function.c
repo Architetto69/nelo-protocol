@@ -63,7 +63,7 @@ static int32_t nelo_fast_sigmoid(int32_t x) {
 
 /**
  * @brief Calcola l'anomalia termica differenziale rispetto alla baseline mobile
- * @param t_skin_raw Temperatura cutanea, valore grezzo a 16 bit dal registro TMP117 (1 LSB = 1/128 °C)
+ * @param t_skin_raw Temperatura cutanea dal TMP117 in centesimi di °C. Es: 3350 = 33.50°C
  * @return S_deltaT Q16.16 in [0, F_ONE]
  */
 static int32_t process_thermal_anomaly(int16_t t_skin_raw) {
