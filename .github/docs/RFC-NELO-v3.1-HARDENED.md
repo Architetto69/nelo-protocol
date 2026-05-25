@@ -109,7 +109,7 @@ IF approvals ≥ Q THEN escalate
 
 Q SHOULD essere ≥ 2/3 dei nodi attivi
 
-Qui il [Quorum Asincrono Probabilistico](https://github.com/Architetto69/nelo-protocol/blob/main/.github/docs/SPEC-002_QUORUM.md)
+Qui il [Quorum Asincrono Probabilistico](./SPEC-002_QUORUM.md)
 
 ---
 
@@ -184,7 +184,7 @@ Effetti:
 * separazione identità / evento
 * eliminare radicalmente la possibilità di tracciamento individuale
 
-Qui il [Protocollo di Oblio](https://github.com/Architetto69/nelo-protocol/blob/main/.github/docs/SPEC-003_OBLIO.md)
+Qui il [Protocollo di Oblio](./SPEC-003_OBLIO.md)
 
 ---
 
