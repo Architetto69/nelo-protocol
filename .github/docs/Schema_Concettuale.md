@@ -402,3 +402,66 @@ H = -\sum_{i=1}^{N} p_i \log_2 p_i
 1.	Resistenza alla Cattura: Nessun punto di controllo centrale
 2.	Privacy by Design: Dati personali distrutti alla fonte
 
+## 🔬 ANALISI DEGLI INVARIANTI CRITTOGRAFICI E MATEMATICI
+
+Il funzionamento del protocollo si fonda su tre pilastri matematici e logici che ne garantiscono l'impossibilità di manipolazione o cattura istituzionale.
+
+### 1. La Funzione di Interdizione Discontinua
+
+La funzione di backoff logaritmico-lineare spezza l'efficacia di attacchi coordinati o sorveglianza di massa dividendo l'operatività in tre regimi discreti:
+
+$$L(D) = \begin{cases} 0 & \text{se } D \le 0.05 \\ L_{base} \cdot e^{k \cdot D} & \text{se } 0.05 < D \le 0.7 \\ L_{base} \cdot e^{k \cdot 0.7} + m \cdot (D - 0.7) & \text{se } D > 0.7 \end{cases}$$
+
+* **Fase Libera ($D \le 0.05$):** La latenza iniettata è nulla. Il sistema non interferisce con le normali attività quotidiane o con le comunicazioni nominali.
+* **Frizione Esponenziale ($0.05 < D \le 0.7$):** Al crescere dello stress antropico, la latenza sale in modo asintotico. A $D = 0.5$, il ritardo si attesta nell'ordine dei secondi ($\approx 4.8s$), quanto basta per destabilizzare i software di trading ad alta frequenza (HFT) o i sistemi di tracciamento biometrico predittivo in tempo reale.
+* **Saturazione Lineare ($D > 0.7$):** Oltre la soglia critica, la pendenza $m$ (pari a $11985.0$) forza una risposta lineare rigida che scala fino a $L_{max} = 3600s$ (1 ora). La rete non si spegne (evitando il *blackout* totale, che offrirebbe un bersaglio tattico evidente), ma si trasforma in una palude computazionale impraticabile.
+
+### 2. Tolleranza ai Guasti Bizantini (BFT) e Attacchi Sybil
+
+La scelta del Quorum Asincrono Probabilistico su base $85/127$ risponde a precisi vincoli della teoria dei sistemi distribuiti:
+
+* **Soglia Bizantina Ottimale:** Nei sistemi distribuiti asincroni, per tollerare $f$ nodi malevoli o compromessi, il numero totale di nodi deve essere almeno $3f + 1$. Con $127$ nodi, la rete tollera fino a:
+
+$$f = \left\lfloor \frac{127 - 1}{3} \right\rfloor = 42 \text{ nodi avversari}$$
+
+
+
+La soglia di approvazione a $85$ soddisfa esattamente il vincolo di sicurezza ($127 - 42 = 85$), garantendo che nessuna fazione minoritaria possa forzare un'interdizione o approvare un falso stato di stress.
+* **Human-in-the-Loop (MFA Biometrico):** Richiedendo una challenge biometrica locale sommata a un OTP per ogni validatore estratto, si neutralizza l'efficacia di attacchi di tipo *Sybil* o *Routing Eclipse* automatizzati tramite botnet.
+
+### 3. Analisi degli Invarianti Sistemici
+
+Le tre metriche di monitoraggio continuo fungono da funzioni di Lyapunov per la stabilità della rete:
+
+| Metrica | Formula | Sensibilità Operativa | Target di Difesa |
+| --- | --- | --- | --- |
+| **Entropia dei Nodi ($H$)** | $H = -\sum p_i \log_2 p_i$ | Misura la topologia e la dispersione dei messaggi nella rete mesh. | Rilevamento di attacchi di partizionamento della rete (*Network Splitting*). |
+| **Ancoraggio Reale ($\alpha$)** | $\alpha = \frac{\text{Risorse Reali}}{\text{Valore Derivato}}$ | Rileva la discrepanza tra flussi transazionali informativi e la disponibilità materiale sottostante. | Contrasto a fenomeni di speculazione algoritmica ricorsiva. |
+| **Divergenza di Consenso ($\Delta C$)** | $\Delta C = \frac{\text{Decisioni Esterne}}{\text{Decisioni Auto}}$ | Calcola lo scostamento tra l'esecuzione deterministica del codice e i tentativi di override manuale. | Prevenzione di attacchi di ingegneria sociale o coercizione dei nodi validatori. |
+
+---
+
+## 🛠️ VERIFICA ARCHITETTURALE SULL'HARDWARE EDGE
+
+L'isolamento radicale dello strato sorgente è l'anello forte della catena *Zero-Trust* di NELO:
+
+```
+[Sensori Analogici] ──► [MAX30102/MAX30009/TMP117]
+                               │ (I2C/SPI)
+                               ▼
+                        [nRF52840 RAM]
+                         ┌──────────────────────────┐
+                         │ SHADOW_BUFFER (Volatile) │
+                         │ ⏱️ Hardware Timer 120ms  │
+                         └────────────┬─────────────┘
+                                      │ Post-Elaborazione
+                                      ▼
+                        [Wipe Totale tramite TRNG]
+
+```
+
+L'uso del coprocessore **CryptoCell-310** per la firma *Ed25519* garantisce che la chiave privata del sensore ($SK_{sensor}$) rimanga confinata nel dominio hardware protetto. L'attivazione di **APPROTECT** (regolabile tramite registri UICR del nRF52840) disabilita permanentemente le interfacce di debug SWD (Serial Wire Debug), impedendo ad aggressori dotati di accesso fisico al dispositivo di effettuare il *dump* della memoria o l'estrazione delle chiavi crittografiche.
+
+Il protocollo si presenta così privo di singoli punti di fallimento (*Single Points of Failure*), strutturato per convertire l'intensità del trauma antropico in un elemento di protezione cibernetica oggettivo e immutabile.
+
+
