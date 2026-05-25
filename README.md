@@ -55,7 +55,7 @@ della varianza umana non ottimizzata.
 # Status Sovereign
 Questo repository è stato sigillato tramite il protocollo di abdicazione. Nessuna singola entità detiene più le chiavi di amministrazione del network.
 
-**DOCS:** [NELO FOR DUMMIES](.github/docs/nelo_protocol_spec_v1.0.md) | [ARCHITETTURA ZERO TRUST](.github/docs/Architettura_zero_trust.md) ! [DISTRIBUZIONE SUL TERRITORIO](.github/docs/Distribuzione_sul_territorio.md)
+**DOCS:** [NELO FOR DUMMIES](.github/docs/nelo_protocol_spec_v1.0.md) | [ARCHITETTURA ZERO TRUST](.github/docs/Architettura_zero_trust.md) ! [DISTRIBUZIONE SUL TERRITORIO E FATTORE UMANO](.github/docs/SPEC-007_DISTRIBUTION_AND_UMAN_FACTOR.md)
 
 
 [STATUS: OPERATIONAL_FRICTION]
