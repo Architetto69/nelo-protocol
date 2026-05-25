@@ -40,6 +40,6 @@ Non abbiamo rimosso il male dal cuore dell'uomo; abbiamo rimosso le leve che per
 
 ---
 ## DOCS:
-[TESTIMONY](./TESTIMONY.md) | [RFC.NELO-v3.1-HARDENED](.github/docs/RFC-NELO-v3.1-HARDENED.md) | [PROTOCOL-SPEC](.github/docs/nelo_protocol_spec_v1.0.md) | [SPEC-001](.github/docs/SPEC-001_BACKOFF.md) | [SPEC-002](.github/docs/SPEC-002_QUORUM.md) | [SPEC-003](.github/docs/SPEC-003_OBLIO.md) | [SPEC-004](.github/docs/SPEC-004_SENSORI.md) | [SPEC-005](.github/docs/SPEC-004_NODI.md)
+[TESTIMONY](./TESTIMONY.md) | [RFC.NELO-v3.1-HARDENED](.github/docs/RFC-NELO-v3.1-HARDENED.md) | [PROTOCOL-SPEC](.github/docs/nelo_protocol_spec_v1.0.md) | [SPEC-001](.github/docs/SPEC-001_BACKOFF.md) | [SPEC-002](.github/docs/SPEC-002_QUORUM.md) | [SPEC-003](.github/docs/SPEC-003_OBLIO.md) | [SPEC-004](.github/docs/SPEC-004_SENSORI.md) | [SPEC-005](.github/docs/SPEC-004_NODI.md) | [SPEC-006](.github/docs/SPEC-006_THREAT_MODELING_AND_VULNERABILITY_ANALYSIS.md)
 
 [STATUS: OPERATIONAL_FRICTION] [MODE: SYSTEMIC_INERTIA] [SCALABILITY: BLOCKED] [LOG: IL COSTO DEL POTERE È LA NOSTRA DIFESA.]
