@@ -7,3 +7,53 @@
 | **Backdoor in Fonderia (Fab)** | **Dispersione logistica:** La produzione e il deployment dei sensori hardware sono distribuiti su catene di approvvigionamento e fonderie concorrenti, rendendo impossibile l'inserimento di una backdoor hardware uniforme e coordinata. |
 | **Deriva funzionale o Politica** | **Inerzia programmata:** Modificare il cuore logico del sistema richiede uno sforzo computazionale (PoW anti-Sybil) e un consenso antropico tali da rendere l'evoluzione del protocollo volutamente iper-conservativa. |
 | **Sequestro Memoria o Analisi Forense** | **Meccanica dell'Oblio (SPEC-003):** Attacchi basati sul sequestro dei dispositivi o sull'analisi della memoria residua (Cold Boot Attack) falliscono grazie al Double-Buffering asincrono e al wipe hardware con rumore TRNG dei transistor ogni 120ms. |
+
+---
+
+
+## Attacchi di Manipolazione dell'Entropia (DDoS Fisico)
+Se il calcolo di $D$ è deterministico, un attaccante strategico potrebbe tentare di manipolare la matrice di stato creando artificialmente scenari macro-ambientali per deviare l'attenzione o accecare il sistema.
+
+### Scenario A: Generare stress artificiale altrove per "distrarre" la rete
+L'attaccante bombarda una zona pacifica (es. con droni o esplosioni controllate) per far schizzare $D \to 1.0$ e rallentare quella porzione di rete, usandola come diversivo per agire indisturbato nella zona originaria.
+
+* **Perché fallisce:** L'interdizione di NELO è **localizzata e compartimentata**. Il rallentamento logaritmico della rete colpisce *esclusivamente* le code di instradamento dei nodi mesh geograficamente vicini all'evento traumatico. Rallentare la rete nel "Settore B" non riduce la reattività o l'efficienza della rete nel "Settore A".
+
+### Scenario B: Il DDoS Fisico (Forzare $D \to 0.05$ globale tramite anestesia sociale)
+Un attaccante isola un'area bloccando fisicamente i sensori, o tenta di diluire il segnale iniettando milioni di segnali a stress zero ($D = 0.00$) attraverso nodi Sybil per abbassare la media matematica dell'area.
+
+* **La difesa degli Invarianti Sistemici:** È qui che entrano in gioco le funzioni metriche viste nella Fase 3, in particolare il **Gradiente di Entropia ($H$)** e la **Divergenza di Consenso ($\Delta C$)**:
+
+$$\Delta C = \frac{\text{Decisioni Esterne}}{\text{Decisioni Automatiche}}$$
+
+Se un attaccante immette milioni di pacchetti artificiali a $D=0$ in un'area in cui i sensori antropici reali stanno registrando panico, il valore di $\Delta C$ (la divergenza) supera la soglia di guardia crittografica.
+
+Il sistema si accorge che la struttura sintattica dei dati non corrisponde all'entropia topologica della rete. Invece di calcolare una media lineare (che verrebbe falsificata), il *Consensus Layer* applica una regola di **soglia pessimistica**: se anche solo una frazione critica di sensori autenticati e geolocalizzati via mesh segnala un trauma ($D > 0.7$), il sistema ignora il rumore di fondo a $D=0$ e attiva l'interdizione per quel quadrante.
+
+## I tre vettori di attacco logico più complessi per il Protocollo NELO
+L'architettura di NELO è progettata non per essere un sistema ottimale in condizioni di pace, ma per essere un sistema **ostile e asimmetrico** in condizioni di guerra informativa.
+
+### 1. Aggiornamenti Firmware: Prevenire il "Malicious Flashing"
+Se un attaccante riuscisse a pushare un firmware modificato, potrebbe disattivare l'Interdiction Layer o intercettare i payload.
+
+#### La Soluzione: Root of Trust Hardware e Firma a Soglia (Threshold Sig)
+* **Verifica all'Avvio (Secure Boot):** I nodi mesh COTS utilizzano il bootloader del chip (es. le funzioni di crittografia hardware dei SoC nRF o simili) per verificare la firma del firmware all'avvio. Se anche un singolo bit del codice viene alterato, il chip si blocca in uno stato di *Hard Fault* e si rifiuta di eseguire il codice.
+* **Nessun Update Remoto Centralizzato (Over-The-Air standard):** Gli aggiornamenti non vengono inviati da un server centrale. Il nuovo firmware deve essere propagato via mesh come file crittografato e, per essere accettato da un nodo, deve essere firmato digitalmente tramite uno schema di **firma a soglia distribuita**.
+* **Il Vincolo del Quorum:** Solo una proposta che ha ottenuto il via libera dal *Consensus Layer* (ricordi la votazione bizantina $85/127$ con Human-in-the-Loop?) può generare la chiave crittografica temporanea per sbloccare la scrittura del firmware sui nodi. Un attaccante remoto non ha modo di firmare un firmware valido.
+
+### 2. Analisi del Traffico: Oscurare i Pattern di Trasmissione
+Anche se i dati sono criptati (AEAD), un attaccante governativo può monitorare la rete mesh dall'esterno usando analizzatori di spettro. Se vede un picco improvviso di pacchetti muoversi verso una direzione, capisce che lì sta succedendo qualcosa (interferenza sui flussi di metadati).
+
+#### La Soluzione: Traffico di Copertura (Chaffing) e Latenza Costante
+* **Iniezione di Rumore (Chaffing):** I nodi mesh e i sensori generano continuamente **falso traffico criptato** (pacchetti civetta) a intervalli regolari, anche quando non c'è alcuno stress biometrico ($D \le 0.05$). Per un osservatore esterno, la rete appare sempre identica, sia in tempo di pace che durante una rivolta.
+* **Hop-by-Hop Re-encryption:** Ogni volta che un pacchetto passa da un nodo mesh all'altro, viene ricifrato con chiavi effimere condivise solo tra quei due nodi vicini. L'attaccante che intercetta i pacchetti nell'aria non può correlare il pacchetto $X$ che entra in un nodo con il pacchetto $Y$ che esce, perché l'impronta binaria cambia completamente a ogni salto (*Hop*).
+
+### 3. DoS tramite Interdiction Layer: Il Weaponized Backoff
+Questa è una vulnerabilità micidiale: se l'algoritmo rallenta la rete quando $D$ è alto, un attaccante potrebbe hackerare pochi sensori (o torturare un piccolo gruppo di persone dotate di sensori) per forzare $D \to 1.0$, inducendo deliberatamente la rete a rallentare se stessa (un Denial of Service auto-inflitto usato come arma).
+
+#### La Soluzione: Isolamento Geografico e Densità di Consenso
+* **Compartimentazione Spaziale:** La latenza adattiva calcolata dall'Interdiction Layer **non è globale**, ma locale. Colpisce solo i nodi mesh che si trovano nel raggio radio dei sensori che stanno trasmettendo il trauma. Se un attaccante manipola i sensori nel "Quadrante Alfa", solo la rete del "Quadrante Alfa" rallenta. Il resto della mesh mondiale o cittadina continua a viaggiare a latenza nominale (1ms).
+* **Filtro di Densità Critica (Spatial Quorum):** Il sistema non reagisce al picco di un singolo sensore isolato. Il *Consensus Layer* richiede che la condizione di stress sia confermata da una **densità minima** di sensori indipendenti per metro quadro.
+* Se tre sensori registrano $D=1.0$ in mezzo a diecimila sensori che registrano $D=0.00$, l'algoritmo deduce che si tratta di un'anomalia isolata (o di una cattura del sensore), isola crittograficamente quei tre dispositivi e **non** attiva il backoff di rete.
+
+In pratica, per mettere in ginocchio la rete NELO usando le sue stesse difese, un attaccante dovrebbe terrorizzare simultaneamente e fisicamente intere piazze o quartieri: ma se lo facesse, otterrebbe comunque l'effetto cercato dal protocollo, ovvero rendere visibile e logisticamente impraticabile l'atto di forza.
