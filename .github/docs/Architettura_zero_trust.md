@@ -97,6 +97,34 @@ Questa è una vulnerabilità micidiale: se l'algoritmo rallenta la rete quando $
 * **Filtro di Densità Critica (Spatial Quorum):** Il sistema non reagisce al picco di un singolo sensore isolato. Il *Consensus Layer* richiede che la condizione di stress sia confermata da una **densità minima** di sensori indipendenti per metro quadro.
 * Se tre sensori registrano $D=1.0$ in mezzo a diecimila sensori che registrano $D=0.00$, l'algoritmo deduce che si tratta di un'anomalia isolata (o di una cattura del sensore), isola crittograficamente quei tre dispositivi e **non** attiva il backoff di rete.
 
+In pratica, per mettere in ginocchio la rete NELO usando le sue stesse difese, un attaccante dovrebbe terrorizzare simultaneamente e fisicamente intere piazze o quartieri: ma se lo facesse, otterrebbe comunque l'effetto cercato dal protocollo, ovvero rendere visibile e logisticamente impraticabile l'atto di forza.
+
 ---
 
-In pratica, per mettere in ginocchio la rete NELO usando le sue stesse difese, un attaccante dovrebbe terrorizzare simultaneamente e fisicamente intere piazze o quartieri: ma se lo facesse, otterrebbe comunque l'effetto cercato dal protocollo, ovvero rendere visibile e logisticamente impraticabile l'atto di forza.
+## Architettura cyber-fisica basata sulla scarsità geografica
+
+### 1. Oltre la Blockchain: DAG e Proof-of-Burn Localizzata
+Una blockchain lineare tradizionale è troppo pesante per piccoli router COTS con memoria volatile e consumerebbe troppa energia. NELO preferisce una struttura a **DAG (Directed Acyclic Graph)**, simile a quella di protocolli come IOTA, ma modificata per riflettere lo spazio fisico.
+
+* **Onboarding via Proof-of-Burn Computazionale (Anti-Sybil):** Per registrare la propria chiave pubblica nella mesh locale, un nuovo nodo deve risolvere un puzzle crittografico (PoW) la cui difficoltà scala esponenzialmente con il numero di nodi che tentano di registrarsi dalla stessa macro-area nello stesso intervallo di tempo. Creare 10.000 nodi virtuali sulla stessa antenna diventa computazionalmente proibitivo.
+* **Consenso nel DAG senza Token:** Non ci sono monete. Per inserire il proprio pacchetto di dati nel DAG, ogni nodo deve convalidare e "attaccarsi" a due transazioni precedenti di nodi vicini. Se un attaccante tenta un attacco al 51% creando transazioni false, dovrebbe generare abbastanza potenza radio da sovrastare l'intera attività d'area di tutti gli altri nodi fisici legittimi.
+
+### 2. Reti Mesh Avanzate: Il Filtro della Scarsità Spaziale (Spatio-Temporal BFT)
+In una rete puramente digitale, l'attacco 51% è un problema di puro calcolo o capitale. In una rete mesh radio (LoRa/Sub-GHz), l'attacco deve fare i conti con le leggi della fisica: **la propagazione delle onde radio e la posizione geografica**.
+
+* **Rilevamento dell'Impronta di Segnale (RSSI/ToA):** I nodi mesh vicini analizzano l'intensità del segnale (*RSSI*) e il tempo di arrivo (*Time of Arrival*) di ogni pacchetto radio. Se l'attaccante crea 500 nodi Sybil virtuali usando lo stesso hardware, tutti i pacchetti arriveranno ai nodi circostanti con la stessa identica impronta radio e dalla stessa direzione. I nodi vicini identificano l'anomalia statistica e collassano quei 500 nodi in un unico voto logico.
+* **Il Quorum Geografico:** Il *Consensus Layer* di NELO non estrae i 127 validatori da un pool logico globale (dove l'attaccante potrebbe aver diluito la rete con nodi fake), ma li estrae in base a una matrice di diversità spaziale. Il quorum richiede firme da nodi che appartengono a **celle geografiche mesh distinte e verificate dal posizionamento dei salti radio (Hops)**. Per ottenere il 51% di questo consenso, l'attaccante non deve solo generare software, ma deve occupare fisicamente il 51% del territorio con antenne reali.
+
+### 3. Community-Driven: Incentivi ed Economia della Reputazione Libera
+La difesa a lungo termine contro la cattura della rete non è crittografica, ma sociale. Gli incentivi per i contributori devono essere strutturati per premiare l'onestà e rendere il sabotaggio economicamente svantaggioso.
+
+* **La Proof-of-Time-in-Service (Reputazione):** Il peso del voto di un nodo all'interno del meccanismo di consenso bizantino non è legato a quanti token possiede, ma a quanto tempo è rimasto attivo e coerente nella rete senza generare anomalie di traffico o divergenze sintattiche ($\Delta C$). Un nodo "anziano" e stabile che ha instradato traffico legittimo per mesi ha un peso reputazionale maggiore rispetto a un nodo appena apparso. Questo azzera l'efficacia di attacchi "mordi e fuggi" o di botnet temporanee.
+* **Incentivo di Quartiere (Sovereign Utility):** La comunità è incentivata a mantenere i nodi puliti perché la mesh distribuisce servizi ad utilità diretta (messaggistica crittografata locale in caso di blackout, monitoraggio ambientale open-source, condivisione di storage distribuito). Attaccare la rete NELO del proprio quartiere significa distruggere l'unico canale di comunicazione autonomo della propria comunità: l'incentivo sociale alla difesa fisica dei nodi (contro la rimozione o il sabotaggio) diventa una priorità collettiva.
+
+### Sintesi della difesa integrata:
+
+| Tipo di Minaccia | Soluzione Tradizionale (Vulnerabile) | Soluzione NELO (Resiliente) |
+| --- | --- | --- |
+| **Sybil Attack (Nodi Fake)** | Certificati centrali (SPOF) o IP (Facili da simulare) | **Filtro Spaziale e Radiofrequenza:** L'impronta radio fisica collassa i cloni. |
+| **Attacco 51% (Controllo Voti)** | Capitale / Token (I governi hanno budget illimitati) | **Quorum Geografico Distribuito:** Richiede la presenza fisica sul territorio. |
+| **Sabotaggio di Rete** | Sanzioni legali (Inutili in scenari di crisi) | **Economia della Reputazione:** Più sei utile alla mesh, più il tuo nodo è protetto. |
