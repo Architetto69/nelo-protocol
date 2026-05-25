@@ -54,7 +54,7 @@ NELO MUST NOT:
 3. Mantenere identità persistenti non necessarie
 4. Operare senza tracciabilità
 
-Qui il [THREAT MODEL](../../THREAT_MODEL.md),
+Qui il [THREAT MODEL](./SPEC-006_THREAT_MODELING_AND_VULNERABILITY_ANALYSIS.md),
 qui il [BACKOFF LOGARITMICO](./SPEC-001_BACKOFF.md)
 
 ---
