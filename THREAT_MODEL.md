@@ -57,3 +57,13 @@ Questa è una vulnerabilità micidiale: se l'algoritmo rallenta la rete quando $
 * Se tre sensori registrano $D=1.0$ in mezzo a diecimila sensori che registrano $D=0.00$, l'algoritmo deduce che si tratta di un'anomalia isolata (o di una cattura del sensore), isola crittograficamente quei tre dispositivi e **non** attiva il backoff di rete.
 
 In pratica, per mettere in ginocchio la rete NELO usando le sue stesse difese, un attaccante dovrebbe terrorizzare simultaneamente e fisicamente intere piazze o quartieri: ma se lo facesse, otterrebbe comunque l'effetto cercato dal protocollo, ovvero rendere visibile e logisticamente impraticabile l'atto di forza.
+
+---
+
+### Sintesi della difesa integrata:
+
+| Tipo di Minaccia | Soluzione Tradizionale (Vulnerabile) | Soluzione NELO (Resiliente) |
+| --- | --- | --- |
+| **Sybil Attack (Nodi Fake)** | Certificati centrali (SPOF) o IP (Facili da simulare) | **Filtro Spaziale e Radiofrequenza:** L'impronta radio fisica collassa i cloni. |
+| **Attacco 51% (Controllo Voti)** | Capitale / Token (I governi hanno budget illimitati) | **Quorum Geografico Distribuito:** Richiede la presenza fisica sul territorio. |
+| **Sabotaggio di Rete** | Sanzioni legali (Inutili in scenari di crisi) | **Economia della Reputazione:** Più sei utile alla mesh, più il tuo nodo è protetto. |
