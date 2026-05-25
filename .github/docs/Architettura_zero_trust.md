@@ -74,10 +74,3 @@ La difesa a lungo termine contro la cattura della rete non è crittografica, ma 
 * **La Proof-of-Time-in-Service (Reputazione):** Il peso del voto di un nodo all'interno del meccanismo di consenso bizantino non è legato a quanti token possiede, ma a quanto tempo è rimasto attivo e coerente nella rete senza generare anomalie di traffico o divergenze sintattiche ($\Delta C$). Un nodo "anziano" e stabile che ha instradato traffico legittimo per mesi ha un peso reputazionale maggiore rispetto a un nodo appena apparso. Questo azzera l'efficacia di attacchi "mordi e fuggi" o di botnet temporanee.
 * **Incentivo di Quartiere (Sovereign Utility):** La comunità è incentivata a mantenere i nodi puliti perché la mesh distribuisce servizi ad utilità diretta (messaggistica crittografata locale in caso di blackout, monitoraggio ambientale open-source, condivisione di storage distribuito). Attaccare la rete NELO del proprio quartiere significa distruggere l'unico canale di comunicazione autonomo della propria comunità: l'incentivo sociale alla difesa fisica dei nodi (contro la rimozione o il sabotaggio) diventa una priorità collettiva.
 
-### Sintesi della difesa integrata:
-
-| Tipo di Minaccia | Soluzione Tradizionale (Vulnerabile) | Soluzione NELO (Resiliente) |
-| --- | --- | --- |
-| **Sybil Attack (Nodi Fake)** | Certificati centrali (SPOF) o IP (Facili da simulare) | **Filtro Spaziale e Radiofrequenza:** L'impronta radio fisica collassa i cloni. |
-| **Attacco 51% (Controllo Voti)** | Capitale / Token (I governi hanno budget illimitati) | **Quorum Geografico Distribuito:** Richiede la presenza fisica sul territorio. |
-| **Sabotaggio di Rete** | Sanzioni legali (Inutili in scenari di crisi) | **Economia della Reputazione:** Più sei utile alla mesh, più il tuo nodo è protetto. |
