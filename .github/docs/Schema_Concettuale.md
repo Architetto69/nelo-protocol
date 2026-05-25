@@ -465,3 +465,70 @@ L'uso del coprocessore **CryptoCell-310** per la firma *Ed25519* garantisce che 
 Il protocollo si presenta così privo di singoli punti di fallimento (*Single Points of Failure*), strutturato per convertire l'intensità del trauma antropico in un elemento di protezione cibernetica oggettivo e immutabile.
 
 
+## 🛡️ THREAT MODELING & RESILIENZA DEL PROTOCOLLO (STRIDE Matrix)
+
+Per garantire che l'architettura non presenti vulnerabilità logiche latenti, le specifiche strutturali di NELO rispondono punto per punto al modello di minaccia standard:
+
+### 1. Spoofing (Sostituzione d'identità del sensore)
+
+* **Vettore di Attacco:** Un avversario tenta di iniettare falsi indici $D = 1.0$ imitando i sensori antropici legittimi per mandare la rete in stallo artificiale.
+* **Contromisura Ambientale:** La firma asimmetrica deterministica **Ed25519** viene sigillata dentro l'enclave logica del coprocessore hardware *CryptoCell-310*. Poiché il flag hardware `APPROTECT` è abilitato in fase di flashing nei registri UICR, le linee di debug fisico SWD sono disattivate. Non è possibile estrarre la chiave privata ($SK_{sensor}$) senza la distruzione fisica del silicio (attacchi via fascio ionico focalizzato - FIB).
+
+### 2. Tampering (Manipolazione dei pacchetti in transito)
+
+* **Vettore di Attacco:** Un nodo della rete Mesh COTS modificato intercetta il pacchetto e altera il valore di $D$ riducendolo a $0.00$ per mascherare un evento di coercizione in corso.
+* **Contromisura Ambientale:** L'uso dello schema crittografico **AEAD** (Authenticated Encryption with Associated Data) garantisce l'integrità end-to-end. Se un router mesh intermedio modifica anche un singolo bit del payload o dei metadati associati (come il timestamp), la firma macro-distribuita fallisce istantaneamente la convalida al livello del *Consensus Layer*, provocando lo scarto immediato del pacchetto.
+
+### 3. Repudiation (Ripudio delle transazioni e dei blocchi)
+
+* **Vettore di Attacco:** Un gruppo di nodi validatori approva una latenza alterata e successivamente tenta di negare la propria partecipazione per evitare ritorsioni.
+* **Contromisura Ambientale:** L'**Audit Layer** scrive in modo immutabile l'hash dell'evento combinato con le impronte crittografiche del quorum dei validatori (l'estrazione casuale dei 127 identificativi anonimizzati). La transizione è vincolata fisicamente da registri non volatili a fusione termica (*e-Fuse*) che impediscono la cancellazione logica dei log storici di interdizione.
+
+### 4. Information Disclosure (Fuga di dati biometrici/identità)
+
+* **Vettore di Attacco:** Intercettazione dei flussi radio (sniffing a radiofrequenza su banda LoRa o BLE) per mappare lo stato di salute o psicofisico della popolazione.
+* **Contromisura Ambientale:** Lo `SHADOW_BUFFER` esegue il wipe distruttivo tramite entropia TRNG hardware entro **120ms** dall'acquisizione. I dati medici grezzi (onde PPG complete, micro-voltmetria della conduttanza cutanea) non lasciano mai i registri volatili interni del chip e non viaggiano mai sulle antenne. L'unica informazione trasmessa è l'indice normalizzato $D$, cifrato con algoritmo simmetrico a monte dell'invio radio.
+
+### 5. Denial of Service (Saturazione e attacchi Sybil)
+
+* **Vettore di Attacco:** Generazione massiva di pacchetti fake per intasare i canali radio Sub-GHz della rete mesh sacrificabile.
+* **Contromisura Ambientale:** Il sistema adotta un meccanismo di *Anti-burst detection* e *Latenza Dinamica di Coda*. Se un nodo mesh viene investito da un traffico anomalo non validato da nonce RNG univoci (freschezza dei messaggi), il router attiva un isolamento logico locale (*Stateless Drop*). La topologia dinamica della mesh esclude il settore sotto attacco riconfigurando i canali di routing logico.
+
+### 6. Elevation of Privilege (Override centralizzato delle policy)
+
+* **Vettore di Attacco:** Un utente con privilegi di root tenta di forzare una revoca della latenza iniettata.
+* **Contromisura Ambientale:** Mancanza strutturale di un'interfaccia di amministrazione o di super-utente. Il superamento della soglia bizantina asincrona ($\ge 85 / 127$) richiede un'interazione fisica umana conscia (*MFA Biometrico + OTP manuale*). Questo vincolo rende matematicamente impossibile a qualsiasi entità remota automatizzata l'elevazione dei privilegi o la coercizione digitale del sistema senza corrompere simultaneamente la maggioranza assoluta della popolazione estratta in tempo reale.
+
+---
+
+## 📈 COMPORTAMENTO DINAMICO DEL FEEDBACK SYSTEM
+
+Il grafico logico delle transizioni di stato evidenzia la stabilità termostatica del protocollo:
+
+```
+           [Rilevamento Anomalie Biometriche]
+                           │
+                           ▼
+          [Calcolo Indice D (Risk Engine)]
+                           │
+            ┌──────────────┴──────────────┐
+            ▼                             ▼
+       D <= 0.05                       D > 0.05
+    (Fase Fluida)                (Frizione Attiva)
+            │                             │
+            ▼                             ▼
+     [Latenza = 0ms]             [Calcolo L(D) Backoff]
+                                          │
+                                          ▼
+                               [Iniezione Code Mesh]
+                                          │
+                                          ▼
+                               [Estensione Cooldown]
+                                  (Memoria Dolore)
+
+```
+
+Questa configurazione chiude il loop di controllo: l'energia sistemica spesa dall'avversario per generare traumi fisici o coercizione biologica viene convertita istantaneamente dalla rete in un calo drastico della larghezza di banda e dell'efficienza dei sistemi di tracciamento.
+
+
+
