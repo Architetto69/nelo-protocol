@@ -34,3 +34,39 @@ Questi nodi di rete agiscono come meri ripetitori crittografici (router di trans
  * **Non possono alterare il valore di D**, poiché qualsiasi modifica invaliderebbe la firma Ed25519 generata dalla chiave privata SK_{sensor} protetta dall'APPROTECT.
  * **Si limitano a validare la firma e la freschezza del nonce** per poi propagare il Payload AEAD all'interno della topologia distribuita della rete, innescando le contromisure di frizione e alterazione logica previste dal protocollo.
 Il sensore, quindi, si comporta come una "sorgente radioattiva" di informazioni: emette spontaneamente i suoi pacchetti blindati a intervalli regolari verso l'esterno. Se non c'è nessuna rete mesh a riceverli, i dati decadono e vengono distrutti dal timer di oblio un istante dopo, senza lasciare alcuna traccia nel silicio.
+
+## Crittografia Basata sull'Identità (IBE) e Proof-of-Burn
+NELO non usa certificati digitali tradizionali (X.509), ma un sistema a due livelli:
+
+* **Identità Cieca Hardware (Ed25519):** Ogni router mesh COTS genera la propria coppia di chiavi in locale al primo avvio. La chiave pubblica del nodo ($PK_{nodo}$) diventa il suo indirizzo di rete.
+* **L'Onboarding per "Proof-of-Burn" o Challenge Sociale:** Per essere inserito nelle tabelle di instradamento dei nodi vicini e partecipare al *Consensus Layer*, un nuovo nodo deve dimostrare di non essere un'entità software malevola creata in massa. Deve completare una prova di lavoro computazionale complessa (**PoW**) legata al tempo corrente, oppure deve ricevere una firma di accreditamento temporanea (un "visto" cieco) da almeno 3 nodi già fidati nel suo raggio radio, tramite protocolli di crittografia a soglia.
+
+> 🔒 **In sintesi:** Non esiste un registro dei nodi autorizzati. Un nodo "esiste" per la rete solo se i suoi vicini fisici ne convalidano il comportamento radiotelevisivo e la correttezza crittografica dei pacchetti inoltrati.
+
+## Impatto Energetico: Duty-Cycling Sincronizzato e Wake-on-Radio
+Per evitare il collasso energetico, NELO mutua tecniche dai protocolli industriali wireless a bassissimo consumo (come TSCH - *Time-Slotted Channel Hopping*):
+```
+Tempo ──► │ Slot 1: RX/TX │ Slot 2: SLEEP (90%) │ Slot 3: SLEEP (90%) │ Slot 4: RX/TX │
+
+```
+* **Pseudosincronizzazione Temporale:** I nodi non sono sincronizzati tramite GPS (facilmente oscurabile o manipolabile), ma tramite i timestamp dei pacchetti validati che transitano. La rete concorda finestre temporali di ascolto millimetriche (es. 10ms di attività ogni 100ms = 10% di Duty Cycle). Fuori da questa finestra, la radio entra in *Deep Sleep*.
+* **Wake-on-Radio (WoR) hardware:** I nodi utilizzano un secondo ricevitore analogico a bassissimo consumo energetico (nell'ordine dei microampere). Questo micro-circuito rimane sempre attivo: quando rileva la portante radio specifica di un pacchetto in arrivo (il preambolo di un payload NELO), "sveglia" il processore principale del router per la ricezione effettiva.
+
+## Attacchi di Manipolazione dell'Entropia (DDoS Fisico)
+Se il calcolo di $D$ è deterministico, un attaccante strategico potrebbe tentare di manipolare la matrice di stato creando artificialmente scenari macro-ambientali per deviare l'attenzione o accecare il sistema.
+
+### Scenario A: Generare stress artificiale altrove per "distrarre" la rete
+L'attaccante bombarda una zona pacifica (es. con droni o esplosioni controllate) per far schizzare $D \to 1.0$ e rallentare quella porzione di rete, usandola come diversivo per agire indisturbato nella zona originaria.
+
+* **Perché fallisce:** L'interdizione di NELO è **localizzata e compartimentata**. Il rallentamento logaritmico della rete colpisce *esclusivamente* le code di instradamento dei nodi mesh geograficamente vicini all'evento traumatico. Rallentare la rete nel "Settore B" non riduce la reattività o l'efficienza della rete nel "Settore A".
+
+### Scenario B: Il DDoS Fisico (Forzare $D \to 0.05$ globale tramite anestesia sociale)
+Un attaccante isola un'area bloccando fisicamente i sensori, o tenta di diluire il segnale iniettando milioni di segnali a stress zero ($D = 0.00$) attraverso nodi Sybil per abbassare la media matematica dell'area.
+
+* **La difesa degli Invarianti Sistemici:** È qui che entrano in gioco le funzioni metriche viste nella Fase 3, in particolare il **Gradiente di Entropia ($H$)** e la **Divergenza di Consenso ($\Delta C$)**:
+
+$$\Delta C = \frac{\text{Decisioni Esterne}}{\text{Decisioni Automatiche}}$$
+
+Se un attaccante immette milioni di pacchetti artificiali a $D=0$ in un'area in cui i sensori antropici reali stanno registrando panico, il valore di $\Delta C$ (la divergenza) supera la soglia di guardia crittografica.
+
+Il sistema si accorge che la struttura sintattica dei dati non corrisponde all'entropia topologica della rete. Invece di calcolare una media lineare (che verrebbe falsificata), il *Consensus Layer* applica una regola di **soglia pessimistica**: se anche solo una frazione critica di sensori autenticati e geolocalizzati via mesh segnala un trauma ($D > 0.7$), il sistema ignora il rumore di fondo a $D=0$ e attiva l'interdizione per quel quadrante.
