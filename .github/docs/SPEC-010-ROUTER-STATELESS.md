@@ -1,9 +1,9 @@
-```markdown
+
 # NELO Protocol Specification
 ## SPEC-010: Architettura del Firmware dei Router Mesh e Gestione dello Stato Volatile
 **Stato:** DRAFT / HARDENED  
 **Versione:** 3.1  
-**Autore:** Architetto Autenticato (br1ge9se)  
+**Autore:** Architetto69 Autenticato
 **Data:** 26 Maggio 2026  
 
 ---
@@ -25,21 +25,20 @@ Per neutralizzare queste minacce, la `SPEC-010` impone il paradigma dell'**Assen
 
 I router basati su hardware COTS (es. architetture ESP32-S3 o Nordic nRF52840 accoppiate a transceiver LoRa SX1262) devono implementare un partizionamento rigido della memoria che esclude qualsiasi scrittura a runtime sui supporti non volatili.
 
-
-```
-
+```c
 +-----------------------------------------------------------------------+
-|                       NOR/NAND FLASH (Sola Lettura)                    |
+|                       NOR/NAND FLASH (Sola Lettura)                   |
 +-----------------------------------------------------------------------+
 |  [Bootloader Protetto] -> [Slot A: FW Immutabile] -> [Slot B: Backup] |
 +-----------------------------------------------------------------------+
 |
-(Esecuzione e Decompressione)
-v
+                       (Esecuzione e Decompressione)
+                                   |
+                                   v
 +-----------------------------------------------------------------------+
 |                            RAM VOLATILE                               |
 +-----------------------------------------------------------------------+
-|  [Kernel/RTOS Space] | [Buffer Circolare Cifrato] | [Heap Temporaneo]  |
+|  [Kernel/RTOS Space] | [Buffer Circolare Cifrato] | [Heap Temporaneo] |
 +-----------------------------------------------------------------------+
 
 ```
@@ -66,7 +65,7 @@ Non appena il puntatore della coda avanza (perché il pacchetto è stato inoltra
 
 La bonifica non si limita a liberare il puntatore, ma sovrascrive attivamente l'area di memoria utilizzando una maschera XOR generata dal generatore di entropia hardware (TRNG) del SoC:
 
-$$\text{Memoria\_OBLIO} = \text{Dati\_Vecchi} \oplus \text{TRNG\_Noise}$$
+$$\text{MemoriaOblio} = \text{DatiVecchi} \oplus \text{TrngNoise}$$
 
 Questo processo distrugge qualsiasi traccia residua di carica capacitiva nelle celle della RAM, rendendo inefficaci gli attacchi di tipo *Cold-Boot* (congelamento della RAM per l'estrazione dei dati post-spegnimento).
 
