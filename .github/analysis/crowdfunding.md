@@ -88,11 +88,3 @@ A questo punto NELO è uno standard industriale aperto. Il crowdfunding non è p
 
 * **La Logica:** Ogni nuova città o comunità che desidera proteggersi apre la propria cella di raccolta fondi locale utilizzando i progetti hardware e i contratti crittografici già validati nella Fase 2. Fonderie parallele e concorrenti in tutto il mondo stampano il silicio in modo indipendente, rendendo la catena di approvvigionamento impossibile da tracciare o bloccare.
 * **Il Risultato finale:** I flussi finanziari si polverizzano. La rete globale emerge come un mosaico di micro-campagne locali di successo, fino al raggiungimento della copertura frattale planetaria.
-
----
-
-### Da dove iniziamo?
-
-Per avviare la **Fase 1 (Seed Alpha)**, dobbiamo preparare il materiale tecnico e concettuale che convincerà i primi investitori critici (i validatori della community).
-
-Preferisci che iniziamo a stendere il **Manifesto della Campagna Alpha** (il testo filosofico e tecnico che spiega l'asimmetria del progetto senza rivelare i dettagli sensibili della supply chain) oppure vogliamo definire la scheda tecnica del **"Kit Router Mesh" per i primi maker**?
