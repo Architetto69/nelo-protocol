@@ -32,7 +32,7 @@ Se decidiamo di percorrere la strada del contactless ricaricabile per la **Fase 
 +-----------------------------------------------------------------------+
 |                       CRIPTO-SENSORE RICARICABILE                     |
 +-----------------------------------------------------------------------+
-|  [Antenna Sub-GHz] <--> [SoC nRF52840] <--> [Sensori Biometrici]     |
+|  [Antenna Sub-GHz] <--> [SoC nRF52840] <--> [Sensori Biometrici]      |
 |                             ^                                         |
 |                             | (Alimentazione Isolata)                 |
 |                             v                                         |
@@ -45,7 +45,7 @@ Se decidiamo di percorrere la strada del contactless ricaricabile per la **Fase 
 |       |                       [Interruttore a Diodo Zen]      |       |
 |       |                                        ^              |       |
 |       |                                        |              |       |
-|       |                       [Micro-Bobina Schermata]       |       |
+|       |                       [Micro-Bobina Schermata]        |       |
 |       +-------------------------------------------------------+       |
 +-----------------------------------------------------------------------+
 
