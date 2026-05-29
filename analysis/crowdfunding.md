@@ -14,6 +14,7 @@ Il costo più massiccio del piano globale (oltre il 90% del budget, circa 768 mi
 * **Il valore percepito:** Il sensore viene commercializzato come un anello intelligente o un bracciale per il monitoraggio biometrico avanzato e la tutela della salute. L'argomento di vendita chiave è la privacy assoluta: un dispositivo elegante che analizza i tuoi parametri vitali senza inviarli a nessun cloud aziendale e senza venderli alle assicurazioni.
 * **L'effetto economico:** Con 100 milioni di persone che preordinano un wearable da circa 10-15 euro, il capitale necessario alla produzione di massa viene **interamente raccolto in anticipo dagli utenti finali**. Il grande capitale iniziale si frammenta in milioni di micro-transazioni individuali, azzerando la necessità di un investitore unico.
 
+#### Per i dettagli operativi, i costi di fabbricazione e la struttura dei Reward Tiers della Fase 1, consultare [crowdfunding_strategy.md](./crowdfunding_strategy.md).
 ---
 
 ### 2. Crowdfunding Azionario/Decentralizzato (Equity/Token-Based) per la R&S e la Mesh
