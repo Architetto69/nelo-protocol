@@ -5,6 +5,7 @@
 **Modello:** Reward-Based (Pre-ordine basato sul prodotto) con allocazione parassitaria dei margini  
 **Canale di Lancio:** Piattaforma indipendente non censurabile o portale Web3 self-hosted  
 
+#### Questo documento definisce l'esecuzione tattica della Fase 1. Per l'analisi filosofica e la roadmap di scaling globale in 3 fasi, fare riferimento a [crowdfunding.md](./crowdfunding.md).
 ---
 
 ## 1. Analisi di Tolleranza e Variabilità del Capitale di Fabbricazione (CapEx)
