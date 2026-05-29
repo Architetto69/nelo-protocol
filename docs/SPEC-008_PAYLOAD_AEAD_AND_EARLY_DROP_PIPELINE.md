@@ -76,55 +76,55 @@ Il payload si compone di una sezione di controllo e dati associati in chiaro (Au
 ## 4. Algoritmo di Serializzazione ed Enclaving Edge (C-Implementation)
 
 ```c
-#include <stdint.h>
-#include <string.h>
-
 #define PACKET_SIZE 96
-#define AUTH_DATA_SIZE 20 // Scomposizione esatta dei dati associati in chiaro (Offset 0-19)
+#define AAD_SIZE 12
+#define PLAINTEXT_SIZE 4
 
 typedef struct __attribute__((packed)) {
+    // --- DATI IN CHIARO AUTENTICATI (AAD) ---
     uint8_t  magic_byte;     // Offset 0
     uint8_t  version;        // Offset 1
     uint16_t seq_no;         // Offset 2
-    uint64_t timestamp;      // Offset 4
-    uint32_t nonce;          // Offset 12
-    uint16_t d_index;        // Offset 16
-    uint8_t  reserved[2];    // Offset 18
-    uint8_t  aead_tag[16];   // Offset 20
-    uint8_t  signature[64];  // Offset 36
+    uint32_t timestamp_sec;  // Offset 4 (Finestra temporale ridotta a secondi)
+    uint32_t nonce;          // Offset 8
+    
+    // --- CORPO CIFRATO (Sostituito in-place dopo la cifratura) ---
+    uint16_t d_index;        // Offset 12 (Protetto)
+    uint8_t  reserved[2];    // Offset 14 (Protetto)
+    
+    // --- CONTROLLO E FIRMA ---
+    uint8_t  aead_tag[16];   // Offset 16
+    uint8_t  signature[64];  // Offset 32
 } NeloPacket_t;
 
 void build_and_sign_nelo_packet(uint16_t calculated_d, NeloPacket_t *out_packet) {
     static uint16_t local_seq = 0;
     
-    // 1. Iniezione metadati strutturali in chiaro (Dati Associati)
-    out_packet->magic_byte = 0x4E;
-    out_packet->version    = 0x31;
-    out_packet->seq_no     = local_seq++;
-    out_packet->timestamp  = hardware_rtc_get_ms();
-    out_packet->nonce      = hardware_trng_get_u32();
-    out_packet->d_index    = calculated_d; 
+    out_packet->magic_byte    = 0x4E;
+    out_packet->version       = 0x31;
+    out_packet->seq_no        = local_seq++;
+    out_packet->timestamp_sec = (uint32_t)(hardware_rtc_get_ms() / 1000);
+    out_packet->nonce         = hardware_trng_get_u32();
     
-    // Iniezione di rumore nello spazio riservato per spezzare l'euristica dei dizionari
+    // Dati sensibili posizionati nel blocco plaintext prima della cifratura
+    out_packet->d_index       = calculated_d;
     hardware_trng_get_bytes(out_packet->reserved, 2);
 
-    // 2. Cifratura Autenticata (AEAD) via Hardware Crypto Engine
-    // Generazione del Tag Poly1305 per i primi 20 byte (Data Block)
-    cryptocell_chacha20_poly1305_encrypt(
-        (uint8_t*)out_packet, AUTH_DATA_SIZE,   
-        out_packet->aead_tag,                    
-        &SK_session_ephemeral                  // Chiave di sessione effimera rimescolata
+    // Cifratura in-place del blocco payload (Offset 12-15) e generazione del Tag
+    cryptocell_chacha20_poly1305_encrypt_inplace(
+        (uint8_t*)&out_packet->d_index, PLAINTEXT_SIZE,
+        (uint8_t*)out_packet, AAD_SIZE,
+        out_packet->aead_tag,
+        &SK_session_ephemeral
     );
 
-    // 3. Firma Asimmetrica Deterministica (Ed25519)
-    // Firma dell'intero blocco autenticato fino al tag incluso (36 byte complessivi)
+    // Firma finale dell'intera struttura generata (32 byte di dati + tag)
     cryptocell_ed25519_sign(
-        (uint8_t*)out_packet, AUTH_DATA_SIZE + 16, 
+        (uint8_t*)out_packet, 32, 
         out_packet->signature,                      
-        &SK_sensor                             // Chiave privata protetta da APPROTECT
+        &SK_sensor                             
     );
 }
-
 ```
 
 ---
