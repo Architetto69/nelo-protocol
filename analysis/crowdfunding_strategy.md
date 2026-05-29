@@ -50,24 +50,24 @@ La gestione dei capitali raccolti durante la campagna non segue logiche speculat
 ```
 
 [ FONDO PRE-ORDINI CROWDFUNDING ]
-|
-v
-+------------+------------+
-| Prezzo del Bracciale    | -> €30,00
-+------------+------------+
-|
-v
-+------------+------------+
-| CapEx Produzione Corrente| -> €12,00 (Forchetta: €9,00 - €15,00)
-+------------+------------+
-|
-v Margine Lordo: €18,00 (Scenario Nominale)
-|
-v
-+------------+------------+
-| FINANZIAMENTO RETE MESH | -> €18,00 -> Copre 100% dei costi di un
+             |
+             v
++------------+--------------+
+| Prezzo del Bracciale      | -> €30,00
++------------+--------------+
+             |
+             v
++------------+--------------+
+| CapEx Produzione Corrente | -> €12,00 (Forchetta: €9,00 - €15,00)
++------------+--------------+
+             |
+             v Margine Lordo: €18,00 (Scenario Nominale)
+             |
+             v
++------------+--------------+
+| FINANZIAMENTO RETE MESH   | -> €18,00 -> Copre 100% dei costi di un
 | (Sottoscrizione Parassita)|               Router Alpha di Superficie
-+-------------------------+
++---------------------------+
 
 ```
 
@@ -84,3 +84,35 @@ Il messaggio della campagna deve scardinare la retorica commerciale delle Big Te
 * **Contro l'Obsolescenza Programmata:** Evidenziare che l'uso di celle Litio-Titanato (LTO) e la sigillatura monoblocco in resina estendono la vita utile del dispositivo a oltre 20 anni, rendendolo un investimento permanente per la propria sicurezza e benessere.
 * **L'Arte come Scudo:** L'apporto artistico e l'assenza di display mimetizzano il dispositivo, rendendolo un accessorio esclusivo ed elegante per il pubblico mainstream, e al contempo invisibile agli analizzatori di spettro avversari.
 
+## 5. Cronoprogramma di Sviluppo Software e Testing della Pre-Serie (In Parallelo)
+
+Per ottimizzare la finestra temporale di attesa dei componenti hardware (stimato in circa 20 settimane), le attività del team core e dei validatori locali si concentrano sullo sviluppo, l'auditing e la validazione del firmware su una pre-serie di sviluppo non resinata. 
+
+Questo processo in parallelo azzera il rischio di bug critici su dispositivi che, per vincoli di sicurezza, non esporranno porte fisiche di debug una volta sigillati.
+<pre>
+Settimane:  | 1-4 | 5-10 | 11-16 | 17-20 |
+Firmware:   [Consolidamento]
+Pre-Serie:        [Banchi Prova]
+Test Mesh:               [Cella Pilota]
+Freeze Codice:                  [Flashing & Colata]
+</pre>
+
+### Fase A: Consolidamento e Simulazione (Settimane 1-4)
+* **Firmware Router-Alpha:** Chiusura delle routine di bonifica della RAM volatile (cancellazione a 120ms) e stress-test sul True Random Number Generator (TRNG) hardware per la generazione delle maschere XOR stocastiche.
+* **Firmware Cripto-Sensore:** Ottimizzazione dei registri EasyDMA per il campionamento dei sensori analogici (PPG/GSR). Configurazione dei cicli di *Deep Sleep* ultra-efficienti per preservare l'autonomia della cella LTO.
+* **App Smartphone:** Sviluppo dell'architettura di storage crittografato locale (database SQLCipher integrato nell'app) per inibire l'accesso forense ai grafici storici memorizzati sul telefono.
+
+### Fase B: La Pre-Serie "Nuda" su Banco Prova (Settimane 5-10)
+Assemblaggio manuale di 20-30 prototipi di sviluppo (componenti COTS su PCB nudi senza colata di resina epossidica) distribuiti al nucleo di sviluppatori interni.
+* **Calibrazione Aptica:** Taratura fine dell'attuatore a risonanza lineare (LRA) del bracciale per garantire che gli impulsi cinematici dello Stato di Emergenza siano percepibili al polso dell'utente ma acusticamente impercettibili all'esterno.
+* **Validazione del Kill-Switch BLE:** Test di interruzione hardware dei registri radio del Bluetooth. Al superamento della soglia biologica critica ($D > 0.7$), la radio 2.4 GHz deve spegnersi istantaneamente e l'applicazione smartphone deve commutare in modalità "Inerte/Storico nominale".
+
+### Fase C: Stress-Test della Cella Pilota sul Terreno (Settimane 11-16)
+I prototipi della pre-serie vengono schierati sul terreno nell'area della prima cella urbana pilota (es. quadrante del progetto "Roma Resiliente") per testare i protocolli di comunicazione in un ambiente elettromagnetico reale.
+* **Verifica del Backoff Logaritmico:** Simulazione di attacchi da congestione per calibrare i tempi di frizione asimmetrica (`SPEC-001`) e l'efficacia dell'algoritmo di herding dei pacchetti Sub-GHz.
+* **Consensus ed Evitamento:** Test dei meccanismi di tolleranza bizantina e di instradamento probabilistico dei payload AEAD da 96 byte verso i Router Alpha di transito stazionari.
+
+### Fase D: Codice "Freeze" e Flashing di Massa (Settimane 17-20)
+* **Ispezione Finale:** Congelamento del codice sorgente del firmware dopo la correzione di tutte le anomalie emerse nei test della cella pilota.
+* **Flashing dei Componenti:** Caricamento del bootloader protetto e del firmware stabile sui chip nRF52840 ed ESP32-S3 arrivati nel frattempo in grandi lotti tramite la supply chain.
+* **Chiusura Industriale:** Autorizzazione alla colata della resina epossidica/poliuretanica negli stampi d'arte dei bracciali, blindando definitivamente l'hardware e il software in un blocco monoblocco anti-manomissione.
