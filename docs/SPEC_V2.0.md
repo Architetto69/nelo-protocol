@@ -27,11 +27,13 @@ Aggiunto dal Gateway Mobile (App) prima dell'inoltro alla rete Mesh.
 
 ## **3\. Schema di Flusso Aggiornato (V2.0)**
 
-`graph TD`  
-    `S1[Sensore nRF52840] -->|Segmento S: Dati Firmati| G[Smartphone Gateway (App)]`  
-    `G -->|Segmento S + A: Con testo Firmato| M[Rete Mesh COTS]`  
-    `M -->|Validazione| CL[Consensus Layer]`  
-    `CL -->|Latenza L(D)| M`
+```mermaid
+graph TD
+    S1[Sensore nRF52840] -->|Segmento S| G[Smartphone Gateway App]
+    G -->|Segmento S + A| M[Rete Mesh Paritetica]
+    M -->|Validazione| CL[Consensus Layer]
+    CL -->|Latenza L D| M
+```
 
 ## **4\. Risk Engine V2 (Integrazione Biometrica)**
 
