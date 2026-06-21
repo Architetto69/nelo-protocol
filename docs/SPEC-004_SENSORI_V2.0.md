@@ -4,13 +4,11 @@
 
 ## **1\. Hardware Layer: Sensoristica Antropica**
 
-L'integrazione sensoristica è stata aggiornata per garantire precisione biometrica e conformità con l'architettura V2.0.
+L'integrazione sensoristica è stata raffinata per riflettere le specifiche di comunicazione di ciascun modulo:
 
-* **MAX30102:** Sensore integrato per PPG (fotopletismografia), battito cardiaco (BPM) e saturazione dell'ossigeno (SpO2).  
-* **AD5941:** Sensore ad alte prestazioni per la misurazione della conduttanza cutanea (EDA/GSR).  
-* **TMP117:** Sensore di temperatura di alta precisione per il calcolo del gradiente ΔT.
-
-**Configurazione Interfaccia:** I sensori comunicano tramite bus I2C dedicato con priorità di interrupt configurata per garantire che il *Risk Engine* riceva dati campionati a frequenza costante (100Hz nominali).
+* **MAX30102 (I2C):** Sensore integrato per PPG (fotopletismografia), battito cardiaco (BPM) e saturazione dell'ossigeno (SpO2).  
+* **TMP117 (I2C):** Sensore di temperatura di alta precisione per il calcolo del gradiente ΔT.  
+* **AD5941 (SPI):** Sensore per la misurazione della conduttanza cutanea (EDA/GSR). L'interfaccia SPI è necessaria per la corretta gestione dei dati ad alta velocità richiesti per le analisi di bioimpedenza.
 
 ## **2\. Firmware Logic: Data Pipeline**
 
