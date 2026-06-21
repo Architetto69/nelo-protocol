@@ -7,7 +7,7 @@
 L'integrazione sensoristica è stata raffinata per riflettere le specifiche di comunicazione di ciascun modulo:
 
 * **MAX30102 (I2C):** Sensore integrato per PPG (fotopletismografia), battito cardiaco (BPM) e saturazione dell'ossigeno (SpO2).  
-* **TMP117 (I2C):** Sensore di temperatura di alta precisione per il calcolo del gradiente ΔT.  
+* **TMP117 (SPI):** Sensore di temperatura di alta precisione per il calcolo del gradiente ΔT.  
 * **AD5941 (SPI):** Sensore per la misurazione della conduttanza cutanea (EDA/GSR). L'interfaccia SPI è necessaria per la corretta gestione dei dati ad alta velocità richiesti per le analisi di bioimpedenza.
 
 ## **2\. Firmware Logic: Data Pipeline**
